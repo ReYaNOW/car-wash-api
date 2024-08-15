@@ -1,49 +1,42 @@
-from fastapi import APIRouter
+from typing import Annotated
 
-from car_wash.users.repository import UsersRepository
-from car_wash.users.schemas import (
-    CreateResponse,
-    DeleteResponse,
-    ReadResponse,
-    UpdateResponse,
-    UserCreate,
-    UserUpdate,
-)
+from fastapi import APIRouter, Depends
+
+from car_wash.users import schemas
+from car_wash.users.service import UsersService
 
 router = APIRouter(prefix='/users', tags=['Users'])
 
 
-@router.post('', response_model=CreateResponse)
-async def create_user(new_user: UserCreate):
-    user_dict = new_user.model_dump()
-    user_id = await UsersRepository().add_one(user_dict)
+@router.post('', response_model=schemas.CreateResponse)
+async def create_user(new_user: schemas.UserCreate):
+    user_id = await UsersService().create_entity(new_user)
     return {'user_id': user_id}
 
 
-@router.get('/{id}', response_model=ReadResponse)
+@router.get('/{id}', response_model=schemas.ReadResponse)
 async def read_user(id: int):
-    user = await UsersRepository().find_one(id)
+    user = await UsersService().read_entity(id)
     return user
 
 
-@router.get('', response_model=list[ReadResponse])
-async def list_users(page: int, limit: int = 10):
-    users = await UsersRepository().find_many(page, limit)
+@router.get('', response_model=list[schemas.ReadResponse])
+async def list_users(query: Annotated[schemas.UserList, Depends()]):
+    users = await UsersService().list_entities(query)
     return users
 
 
 @router.patch(
     '/{id}',
-    response_model=UpdateResponse,
+    response_model=schemas.UpdateResponse,
     description='Update certain fields of existing user',
 )
-async def update_user(id: int, new_values: UserUpdate):
-    new_values_dict = new_values.model_dump(exclude_none=True)
-    updated_user = await UsersRepository().change_one(id, new_values_dict)
+async def update_user(id: int, new_values: schemas.UserUpdate):
+    updated_user = await UsersService().update_entity(id, new_values)
     return updated_user
 
 
-@router.delete('/{id}', response_model=DeleteResponse)
+@router.delete('/{id}', response_model=schemas.DeleteResponse)
 async def delete_user(id: int):
-    await UsersRepository().delete_one(id)
+    await UsersService().delete_entity(id)
     return {'detail': f'User successfully deleted with id: {id}'}

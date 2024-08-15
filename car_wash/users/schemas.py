@@ -1,6 +1,9 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
+
+from car_wash.utils.schemas import GenericListRequest
 
 
 class UserCreate(BaseModel):
@@ -17,6 +20,12 @@ class UserRead(BaseModel):
     first_name: str
     last_name: str
     created_at: datetime
+
+
+class UserList(GenericListRequest):
+    order_by: Literal[
+        'id', 'username', 'password', 'first_name', 'last_name', 'created_at'
+    ] = 'id'
 
 
 class UserUpdate(BaseModel):
