@@ -7,11 +7,12 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = {extras = ["full"], version = "^0.112.0"}
+fastapi = {extras = ["standard"], version = "^0.112.0"}
 sqlalchemy = "^2.0.32"
 asyncpg = "^0.29.0"
 alembic = "^1.13.2"
 pydantic-settings = "^2.4.0"
+parse = "^1.20.2"
 
 
 [tool.poetry.group.dev.dependencies]
