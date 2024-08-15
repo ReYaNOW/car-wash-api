@@ -3,9 +3,11 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from car_wash.cars.models import metadata as cars_metadata
+from car_wash.cars.body_types.models import metadata as car_body_type_metadata
+from car_wash.cars.brands.models import metadata as car_brand_metadata
+from car_wash.cars.models import metadata as car_and_car_generation_metadata
 from car_wash.database import async_url
-from car_wash.users.models import metadata as users_metadata
+from car_wash.users.models import metadata as user_metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,7 +25,12 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [users_metadata, cars_metadata]
+target_metadata = [
+    user_metadata,
+    car_body_type_metadata,
+    car_brand_metadata,
+    car_and_car_generation_metadata,
+]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
