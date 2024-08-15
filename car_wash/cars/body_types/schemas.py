@@ -1,0 +1,48 @@
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+from car_wash.utils.schemas import GenericListRequest
+
+
+class BodyTypeCreate(BaseModel):
+    name: str = Field(
+        examples=['легковой автомобиль представительского класса']
+    )
+
+
+class BodyTypeRead(BaseModel):
+    id: int
+    name: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class BodyTypeList(GenericListRequest):
+    order_by: Literal['id', 'name', 'created_at'] = 'id'
+
+
+class BodyTypeUpdate(BaseModel):
+    name: str = Field(
+        default=None,
+        examples=['легковой автомобиль представительского класса'],
+    )
+
+
+class CreateResponse(BaseModel):
+    body_type_id: int
+
+
+class ReadResponse(BodyTypeRead):
+    pass
+
+
+class UpdateResponse(BodyTypeRead):
+    pass
+
+
+class DeleteResponse(BaseModel):
+    detail: str
