@@ -15,7 +15,7 @@ class CarWashCreate(BaseModel):
 class CarWashRead(BaseModel):
     id: int
     name: str
-    boxes: str
+    boxes: int
     location_id: int
     created_at: datetime
 
