@@ -14,7 +14,7 @@ router = APIRouter(prefix='/cars', tags=['Cars'])
 # in swagger doc
 
 sub_router = APIRouter(
-    prefix='/cars', tags=['CarBodyType, CarBrands, CarGenerations']
+    prefix='/cars', tags=['CarBodyTypes, CarBrands, CarGenerations']
 )
 
 sub_router.include_router(body_types_router)
