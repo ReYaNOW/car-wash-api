@@ -60,8 +60,6 @@ class CarRead(BaseModel):
 
 
 class CarList(GenericListRequest):
-    page: int
-    limit: int = 10
     order_by: Literal[
         'id',
         'name',
