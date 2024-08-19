@@ -20,11 +20,11 @@ class ConfigurationRead(BaseModel):
 
 
 class ConfigurationList(GenericListRequest):
-    order_by: Literal[
-        'id',
-        'generation_id',
-        'body_type_id',
-    ] = 'id'
+    order_by: Literal['id', 'generation_id', 'body_type_id'] = 'id'
+    name_like: str | None = Field(
+        default=None, description='Search by substring'
+    )
+    generation_id: int | None = None
 
 
 class ConfigurationUpdate(BaseModel):

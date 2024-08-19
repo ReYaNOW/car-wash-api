@@ -20,9 +20,16 @@ class GenericCRUDService:
         return entity
 
     async def list_entities(self, query: GenericListRequest):
-        page, limit, order_by = query.page, query.limit, query.order_by
+        query = query.model_dump()
+        page, limit, order_by = (
+            query.pop('page'),
+            query.pop('limit'),
+            query.pop('order_by'),
+        )
+        filters = {k: v for k, v in query.items() if v is not None}
+
         users = await self.crud_repo.find_many(
-            page, limit, order_by, load_children=True
+            page, limit, order_by, filters, load_children=True
         )
         return users
 

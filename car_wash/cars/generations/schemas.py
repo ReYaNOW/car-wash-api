@@ -66,6 +66,15 @@ class GenerationRead(BaseModel):
 
 class GenerationList(GenericListRequest):
     order_by: Literal['id', 'name', 'model_id'] = 'id'
+    name_like: str | None = Field(
+        default=None, description='Search by substring'
+    )
+    model_id: int | None = None
+
+    start_year: int | Literal['past'] | None = None
+    end_year: int | Literal['present'] | None = None
+
+    model_config = ConfigDict(protected_namespaces=())
 
 
 class GenerationUpdate(GenerationCreate):

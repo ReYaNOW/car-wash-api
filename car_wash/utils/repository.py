@@ -2,10 +2,11 @@ import functools
 from abc import ABC, abstractmethod
 
 from fastapi import HTTPException
-from sqlalchemy import delete, insert, inspect, select, update
+from sqlalchemy import and_, delete, insert, inspect, select, update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import MappedColumn, joinedload
 
+from car_wash.cars.models import UserCar
 from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import handle_integrity_error
 
@@ -20,7 +21,12 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def find_many(
-        self, page: int, limit: int, order_by: str, load_children: bool
+        self,
+        page: int,
+        limit: int,
+        order_by: str,
+        filter_by: dict,
+        load_children: bool,
     ) -> list:
         raise NotImplementedError
 
@@ -72,7 +78,12 @@ class SQLAlchemyRepository(AbstractRepository):
 
     @error_handler
     async def find_many(
-        self, page: int, limit: int, order_by: str, load_children: bool
+        self,
+        page: int,
+        limit: int,
+        order_by: str,
+        filters: dict,
+        load_children: bool,
     ) -> list:
         offset_value = page * limit - limit
         async with async_session_maker() as session:
@@ -82,6 +93,9 @@ class SQLAlchemyRepository(AbstractRepository):
                 .limit(limit)
                 .order_by(order_by)
             )
+            if filters:
+                expressions = self.get_expressions(filters)
+                query = query.where(and_(*expressions))
 
             if load_children:
                 joined_loads = self.get_joined_loads()
@@ -124,3 +138,17 @@ class SQLAlchemyRepository(AbstractRepository):
             joined_loads.append(joinedload(getattr(self.model, relationship)))
 
         return joined_loads
+
+    def get_expressions(self, filters):
+        self.model: UserCar
+        expressions = []
+        for k, v in filters.items():
+            k: str
+            if k.endswith('_like'):
+                column: MappedColumn = getattr(self.model, k.split('_like')[0])
+                expressions.append(column.like(f'%{v}%'))
+            else:
+                column: MappedColumn = getattr(self.model, k)
+                expressions.append(column == v)
+
+        return expressions

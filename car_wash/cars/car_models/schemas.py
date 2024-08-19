@@ -20,6 +20,8 @@ class ModelRead(BaseModel):
 
 class ModelList(GenericListRequest):
     order_by: Literal['id', 'name'] = 'id'
+    name_like: str | None = None
+    brand_id: int | None = None
 
 
 class ModelUpdate(BaseModel):

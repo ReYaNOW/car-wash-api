@@ -22,7 +22,10 @@ class BodyTypeRead(BaseModel):
 
 
 class BodyTypeList(GenericListRequest):
-    order_by: Literal['id', 'name', 'created_at'] = 'id'
+    order_by: Literal['id', 'name'] = 'id'
+    name_like: str | None = Field(
+        default=None, description='Search by substring'
+    )
 
 
 class BodyTypeUpdate(BaseModel):

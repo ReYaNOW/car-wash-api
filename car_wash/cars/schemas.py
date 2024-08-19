@@ -28,6 +28,12 @@ class UserCarRead(BaseModel):
 
 class UserCarList(GenericListRequest):
     order_by: Literal['id', 'name', 'user_id', 'configuration_id'] = 'id'
+    name_like: str | None = Field(
+        default=None, description='Search by substring'
+    )
+    user_id: int | None = None
+    configuration_id: int | None = None
+    is_verified: bool | None = None
 
 
 class UserCarUpdate(BaseModel):

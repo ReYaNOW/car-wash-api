@@ -21,6 +21,9 @@ class BrandRead(BaseModel):
 
 class BrandList(GenericListRequest):
     order_by: Literal['id', 'name', 'created_at'] = 'id'
+    name_like: str | None = Field(
+        default=None, description='Search by substring'
+    )
 
 
 class BrandUpdate(BaseModel):
