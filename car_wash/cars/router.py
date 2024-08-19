@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from starlette.concurrency import run_in_threadpool
 
 from car_wash.cars import schemas
 from car_wash.cars.body_types.router import router as body_types_router
@@ -9,6 +10,7 @@ from car_wash.cars.car_models.router import router as car_models_router
 from car_wash.cars.configurations.router import router as configurations_router
 from car_wash.cars.generations.router import router as generations_router
 from car_wash.cars.service import UserCarService
+from car_wash.config import config
 
 router = APIRouter(prefix='/cars', tags=['Cars'])
 
@@ -61,3 +63,11 @@ async def update_car(id: int, new_values: schemas.UserCarUpdate):
 async def delete_car(id: int):
     id_ = await UserCarService().delete_entity(id)
     return {'detail': f'User car successfully deleted with id: {id_}'}
+
+
+if config.debug:
+    from car_wash.utils.fill_db_with_cars import fill_db
+
+    @router.post('/fill_db_with_cars')
+    async def fill_db_with_cars():
+        return await run_in_threadpool(fill_db)
