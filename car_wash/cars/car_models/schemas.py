@@ -20,7 +20,9 @@ class ModelRead(BaseModel):
 
 class ModelList(GenericListRequest):
     order_by: Literal['id', 'name'] = 'id'
-    name_like: str | None = None
+    name_like: str | None = Field(
+        default=None, description='Search by substring'
+    )
     brand_id: int | None = None
 
 
