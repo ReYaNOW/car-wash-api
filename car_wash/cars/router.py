@@ -1,7 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from starlette.concurrency import run_in_threadpool
+from fastapi import APIRouter, BackgroundTasks, Depends
 
 from car_wash.cars import schemas
 from car_wash.cars.body_types.router import router as body_types_router
@@ -69,5 +68,9 @@ if config.debug:
     from car_wash.utils.fill_db_with_cars import fill_db
 
     @router.post('/fill_db_with_cars')
-    async def fill_db_with_cars():
-        return await run_in_threadpool(fill_db)
+    async def fill_db_with_cars(background_tasks: BackgroundTasks):
+        if config.filling_db:
+            return 'Database is already filling up'
+        background_tasks.add_task(fill_db)
+        config.filling_db = True
+        return 'Started filling database with cars data'
