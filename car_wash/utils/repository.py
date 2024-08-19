@@ -146,7 +146,7 @@ class SQLAlchemyRepository(AbstractRepository):
             k: str
             if k.endswith('_like'):
                 column: MappedColumn = getattr(self.model, k.split('_like')[0])
-                expressions.append(column.like(f'%{v}%'))
+                expressions.append(column.ilike(f'%{v}%'))
             else:
                 column: MappedColumn = getattr(self.model, k)
                 expressions.append(column == v)
