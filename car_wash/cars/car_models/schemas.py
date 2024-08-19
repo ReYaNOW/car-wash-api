@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class ModelCreate(BaseModel):
@@ -38,6 +38,10 @@ class CreateResponse(BaseModel):
 
 class ReadResponse(ModelRead):
     pass
+
+
+class ListResponse(GenericListResponse):
+    data: list[ModelRead]
 
 
 class UpdateResponse(ModelRead):

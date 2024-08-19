@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class BodyTypeCreate(BaseModel):
@@ -41,6 +41,10 @@ class CreateResponse(BaseModel):
 
 class ReadResponse(BodyTypeRead):
     pass
+
+
+class ListResponse(GenericListResponse):
+    data: list[BodyTypeRead]
 
 
 class UpdateResponse(BodyTypeRead):

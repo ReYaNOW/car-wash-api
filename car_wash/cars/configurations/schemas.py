@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class ConfigurationCreate(BaseModel):
@@ -21,10 +21,8 @@ class ConfigurationRead(BaseModel):
 
 class ConfigurationList(GenericListRequest):
     order_by: Literal['id', 'generation_id', 'body_type_id'] = 'id'
-    name_like: str | None = Field(
-        default=None, description='Search by substring'
-    )
     generation_id: int | None = None
+    body_type_id: int | None = None
 
 
 class ConfigurationUpdate(BaseModel):
@@ -38,6 +36,10 @@ class CreateResponse(BaseModel):
 
 class ReadResponse(ConfigurationRead):
     pass
+
+
+class ListResponse(GenericListResponse):
+    data: list[ConfigurationRead]
 
 
 class UpdateResponse(ConfigurationRead):

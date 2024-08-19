@@ -9,7 +9,7 @@ from pydantic import (
 )
 
 from car_wash.cars.utils import validate_year_range
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class GenerationCreate(BaseModel):
@@ -49,8 +49,8 @@ class GenerationRead(BaseModel):
     id: int
     name: str
     model_id: int
-    start_year: int = Field(exclude=True)
-    end_year: int = Field(exclude=True)
+    start_year: int | str = Field(exclude=True)
+    end_year: int | str = Field(exclude=True)
 
     model_config = ConfigDict(protected_namespaces=(), from_attributes=True)
 
@@ -94,6 +94,10 @@ class CreateResponse(BaseModel):
 
 class ReadResponse(GenerationRead):
     pass
+
+
+class ListResponse(GenericListResponse):
+    data: list[GenerationRead]
 
 
 class UpdateResponse(GenerationRead):

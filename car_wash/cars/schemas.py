@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, computed_field
 
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class UserCarCreate(BaseModel):
@@ -49,6 +49,10 @@ class CreateResponse(BaseModel):
 
 class ReadResponse(UserCarRead):
     pass
+
+
+class ListResponse(GenericListResponse):
+    data: list[UserCarRead]
 
 
 class UpdateResponse(UserCarRead):
