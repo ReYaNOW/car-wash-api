@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c8abab73369a
+Revision ID: 5633b9e4bffa
 Revises:
-Create Date: 2024-08-19 03:13:01.621882
+Create Date: 2024-08-19 14:52:48.076684
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c8abab73369a'
+revision: str = '5633b9e4bffa'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -58,7 +58,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['brand_id'], ['car_brand.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name', 'brand_id', name='uix_car_model__name_brand_id')
     )
     op.create_table('car_wash',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -78,7 +78,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['model_id'], ['car_model.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.UniqueConstraint('name', 'model_id', name='uix_car_generation__name_model_id')
     )
     op.create_table('car_configuration',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -87,7 +87,8 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.ForeignKeyConstraint(['body_type_id'], ['car_body_type.id'], ),
     sa.ForeignKeyConstraint(['generation_id'], ['car_generation.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('generation_id', 'body_type_id', name='uix_car_configuration__generation_id_body_type_id')
     )
     op.create_table('user_car',
     sa.Column('id', sa.Integer(), nullable=False),
