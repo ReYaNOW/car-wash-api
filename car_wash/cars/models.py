@@ -1,11 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, String, func
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    relationship,
-)
+from sqlalchemy import ForeignKey, String, UniqueConstraint, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from car_wash.database import Base
 
@@ -24,9 +20,16 @@ class CarBrand(Base):
 
 class CarModel(Base):
     __tablename__ = 'car_model'
+    __table_args__ = (
+        UniqueConstraint(
+            'name',
+            'brand_id',
+            name='uix_car_model__name_brand_id',
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(unique=True)
+    name: Mapped[str] = mapped_column()
     brand_id: Mapped[int] = mapped_column(
         ForeignKey(CarBrand.id, ondelete='RESTRICT')
     )
@@ -40,9 +43,16 @@ class CarModel(Base):
 
 class CarGeneration(Base):
     __tablename__ = 'car_generation'
+    __table_args__ = (
+        UniqueConstraint(
+            'name',
+            'model_id',
+            name='uix_car_generation__name_model_id',
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(unique=True, nullable=True)
+    name: Mapped[str] = mapped_column(nullable=True)
     model_id: Mapped[int] = mapped_column(ForeignKey(CarModel.id))
 
     start_year: Mapped[int] = mapped_column(String(10))
@@ -70,6 +80,13 @@ class CarBodyType(Base):
 
 class CarConfiguration(Base):
     __tablename__ = 'car_configuration'
+    __table_args__ = (
+        UniqueConstraint(
+            'generation_id',
+            'body_type_id',
+            name='uix_car_configuration__generation_id_body_type_id',
+        ),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     generation_id: Mapped[int] = mapped_column(ForeignKey(CarGeneration.id))
