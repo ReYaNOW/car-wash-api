@@ -27,8 +27,12 @@ def fill_db():
     with open('base.json', encoding='UTF-8') as file:
         data = json.load(file)
 
+    counter = 0
     for brand_data in data:
-        # Создание или получение записи CarBrand
+        counter += 1
+        if counter % 15 == 0:
+            print(counter)
+
         brand_name = brand_data['name']
         brand = session.query(CarBrand).filter_by(name=brand_name).first()
         if not brand:
@@ -129,5 +133,5 @@ def fill_db():
                         #     и кузовом '{body_type_name}'
                         #     уже существует в базе данных."
                         # )
-
+    config.filling_db = False
     print('Данные успешно обработаны.')
