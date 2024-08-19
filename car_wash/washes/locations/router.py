@@ -24,7 +24,7 @@ async def read_location(id: int):
 async def list_locations(
     query: Annotated[schemas.CarWashLocationList, Depends()],
 ):
-    locations = await CarWashLocationService().list_entities(query)
+    locations = await CarWashLocationService().paginate_entities(query)
     return locations
 
 

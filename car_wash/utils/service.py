@@ -1,7 +1,7 @@
 import pydantic
 
 from car_wash.utils.repository import AbstractRepository
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class GenericCRUDService:
@@ -19,7 +19,7 @@ class GenericCRUDService:
         entity = await self.crud_repo.find_one(id, load_children=True)
         return entity
 
-    async def list_entities(self, query: GenericListRequest):
+    async def paginate_entities(self, query: GenericListRequest):
         query = query.model_dump()
         page, limit, order_by = (
             query.pop('page'),
@@ -28,10 +28,12 @@ class GenericCRUDService:
         )
         filters = {k: v for k, v in query.items() if v is not None}
 
-        users = await self.crud_repo.find_many(
+        entities = await self.crud_repo.find_many(
             page, limit, order_by, filters, load_children=True
         )
-        return users
+        total_records = await self.crud_repo.count_records(filters)
+        pages = (total_records + limit - 1) // limit
+        return GenericListResponse(data=entities, total=pages, current=page)
 
     async def update_entity(self, id: int, new_values: pydantic.BaseModel):
         new_values_dict = new_values.model_dump(exclude_none=True)

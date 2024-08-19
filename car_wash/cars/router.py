@@ -42,10 +42,10 @@ async def read_user_car(id: int):
     return user_car
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@router.get('', response_model=schemas.ListResponse)
 async def list_user_cars(query: Annotated[schemas.UserCarList, Depends()]):
-    user_cars = await UserCarService().list_entities(query)
-    return user_cars
+    paginated_cars = await UserCarService().paginate_entities(query)
+    return paginated_cars
 
 
 @router.patch(

@@ -20,10 +20,10 @@ async def read_brand(id: int):
     return brand
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@router.get('', response_model=schemas.ListResponse)
 async def list_brands(query: Annotated[schemas.BrandList, Depends()]):
-    brands = await CarBrandService().list_entities(query)
-    return brands
+    paginated_brands = await CarBrandService().paginate_entities(query)
+    return paginated_brands
 
 
 @router.patch(

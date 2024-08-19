@@ -22,7 +22,7 @@ async def read_user(id: int):
 
 @router.get('', response_model=list[schemas.ReadResponse])
 async def list_users(query: Annotated[schemas.UserList, Depends()]):
-    users = await UsersService().list_entities(query)
+    users = await UsersService().paginate_entities(query)
     return users
 
 

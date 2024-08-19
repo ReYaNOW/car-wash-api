@@ -27,7 +27,7 @@ async def read_car_wash(id: int):
 
 @router.get('', response_model=list[schemas.ReadResponse])
 async def list_car_washes(query: Annotated[schemas.CarWashList, Depends()]):
-    car_washes = await CarWashService().list_entities(query)
+    car_washes = await CarWashService().paginate_entities(query)
     return car_washes
 
 

@@ -2,7 +2,7 @@ import functools
 from abc import ABC, abstractmethod
 
 from fastapi import HTTPException
-from sqlalchemy import and_, delete, insert, inspect, select, update
+from sqlalchemy import and_, delete, func, insert, inspect, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import MappedColumn, joinedload
 
@@ -36,6 +36,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def delete_one(self, id: int) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def count_records(self, filters: dict):
         raise NotImplementedError
 
 
@@ -103,6 +107,17 @@ class SQLAlchemyRepository(AbstractRepository):
 
             res = await session.execute(query)
             return res.unique().scalars().all()
+
+    async def count_records(self, filters: dict):
+        async with async_session_maker() as session:
+            query = select(func.count()).select_from(self.model)
+
+            if filters:
+                expressions = self.get_expressions(filters)
+                query = query.where(and_(*expressions))
+
+            res = await session.execute(query)
+            return res.scalar_one()
 
     @error_handler
     async def change_one(self, id: int, data: dict) -> dict:

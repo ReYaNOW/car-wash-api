@@ -22,12 +22,14 @@ async def read_configuration(id: int):
     return configuration
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@router.get('', response_model=schemas.ListResponse)
 async def list_configurations(
     query: Annotated[schemas.ConfigurationList, Depends()],
 ):
-    configurations = await CarConfigurationService().list_entities(query)
-    return configurations
+    paginated_configurations = (
+        await CarConfigurationService().paginate_entities(query)
+    )
+    return paginated_configurations
 
 
 @router.patch(

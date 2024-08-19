@@ -20,10 +20,10 @@ async def read_model(id: int):
     return model
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@router.get('', response_model=schemas.ListResponse)
 async def list_models(query: Annotated[schemas.ModelList, Depends()]):
-    models = await CarModelService().list_entities(query)
-    return models
+    paginated_models = await CarModelService().paginate_entities(query)
+    return paginated_models
 
 
 @router.patch(

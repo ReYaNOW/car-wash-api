@@ -20,12 +20,14 @@ async def read_generation(id: int):
     return generation
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@router.get('', response_model=schemas.ListResponse)
 async def list_generations(
     query: Annotated[schemas.GenerationList, Depends()],
 ):
-    generations = await CarGenerationService().list_entities(query)
-    return generations
+    paginated_generations = await CarGenerationService().paginate_entities(
+        query
+    )
+    return paginated_generations
 
 
 @router.patch(

@@ -20,10 +20,10 @@ async def read_body_type(id: int):
     return body_type
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@router.get('', response_model=schemas.ListResponse)
 async def list_body_types(query: Annotated[schemas.BodyTypeList, Depends()]):
-    body_types = await CarBodyTypeService().list_entities(query)
-    return body_types
+    paginated_body_types = await CarBodyTypeService().paginate_entities(query)
+    return paginated_body_types
 
 
 @router.patch(
