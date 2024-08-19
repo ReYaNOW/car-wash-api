@@ -3,50 +3,107 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, String, func
 from sqlalchemy.orm import (
     Mapped,
-    declarative_base,
     mapped_column,
     relationship,
 )
 
-from car_wash.cars.body_types.models import CarBodyType
-from car_wash.cars.brands.models import CarBrand
+from car_wash.database import Base
 
-Base = declarative_base()
 metadata = Base.metadata
+
+
+class CarBrand(Base):
+    __tablename__ = 'car_brand'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+
+    models: Mapped[list['CarModel']] = relationship(back_populates='brand')
+
+
+class CarModel(Base):
+    __tablename__ = 'car_model'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    brand_id: Mapped[int] = mapped_column(
+        ForeignKey(CarBrand.id, ondelete='RESTRICT')
+    )
+    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+
+    brand: Mapped['CarBrand'] = relationship(back_populates='models')
+    generations: Mapped[list['CarGeneration']] = relationship(
+        back_populates='model'
+    )
 
 
 class CarGeneration(Base):
     __tablename__ = 'car_generation'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    car_id: Mapped[int] = mapped_column(ForeignKey('car.id'))
-    name: Mapped[str] = mapped_column(unique=True)
-
-    car: Mapped['Car'] = relationship(back_populates='generations')
-
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-
-
-class Car(Base):
-    __tablename__ = 'car'
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
-
-    body_type_id: Mapped[int] = mapped_column(
-        ForeignKey(CarBodyType.id, ondelete='RESTRICT')
-    )
-    brand_id: Mapped[int] = mapped_column(
-        ForeignKey(CarBrand.id, ondelete='RESTRICT')
-    )
-
-    model: Mapped[str] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(unique=True, nullable=True)
+    model_id: Mapped[int] = mapped_column(ForeignKey(CarModel.id))
 
     start_year: Mapped[int] = mapped_column(String(10))
     end_year: Mapped[int] = mapped_column(String(10))
 
-    generations: Mapped[list['CarGeneration']] = relationship(
-        back_populates='car'
+    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+
+    model: Mapped['CarModel'] = relationship(back_populates='generations')
+    configurations: Mapped[list['CarConfiguration']] = relationship(
+        back_populates='generation'
     )
 
+
+class CarBodyType(Base):
+    __tablename__ = 'car_body_type'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+
+    configurations: Mapped[list['CarConfiguration']] = relationship(
+        back_populates='body_type'
+    )
+
+
+class CarConfiguration(Base):
+    __tablename__ = 'car_configuration'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    generation_id: Mapped[int] = mapped_column(ForeignKey(CarGeneration.id))
+
+    body_type_id: Mapped[str] = mapped_column(ForeignKey(CarBodyType.id))
+
+    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+
+    body_type: Mapped['CarBodyType'] = relationship(
+        back_populates='configurations'
+    )
+    generation: Mapped['CarGeneration'] = relationship(
+        back_populates='configurations'
+    )
+    user_cars: Mapped[list['UserCar']] = relationship(
+        back_populates='configuration'
+    )
+
+
+class UserCar(Base):
+    __tablename__ = 'user_car'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+
+    user_id = mapped_column(ForeignKey('users.id', ondelete='RESTRICT'))
+    configuration_id = mapped_column(
+        ForeignKey(CarConfiguration.id, ondelete='RESTRICT')
+    )
+    is_verified: Mapped[bool]
+
+    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+
+    user = relationship('Users', back_populates='cars')
+    configuration: Mapped['CarConfiguration'] = relationship(
+        back_populates='user_cars'
+    )

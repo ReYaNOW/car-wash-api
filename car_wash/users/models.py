@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from sqlalchemy import String, func
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-Base = declarative_base()
+from car_wash.database import Base
+
 metadata = Base.metadata
 
 
@@ -16,5 +17,7 @@ class Users(Base):
 
     first_name: Mapped[str]
     last_name: Mapped[str]
+
+    cars = relationship('UserCar', back_populates='user')
 
     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())

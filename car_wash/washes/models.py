@@ -1,11 +1,11 @@
 from datetime import datetime
 
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, declarative_base, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 
+from car_wash.database import Base
 from car_wash.washes.locations.models import CarWashLocation
 
-Base = declarative_base()
 metadata = Base.metadata
 
 
