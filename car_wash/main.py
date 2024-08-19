@@ -24,7 +24,8 @@ tags_metadata = [
         'description': 'Operations with **cars**.',
     },
     {
-        'name': 'CarBodyTypes, CarBrands, CarGenerations',
+        'name': 'CarBrands, CarModels, CarGenerations, '
+        'CarBodyTypes, CarConfiguration',
         'description': 'Operations with  **Car** **attributes**',
     },
 ]
