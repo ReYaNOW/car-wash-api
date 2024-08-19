@@ -1,6 +1,6 @@
-from car_wash.cars.models import Car
+from car_wash.cars.models import UserCar
 from car_wash.utils.repository import SQLAlchemyRepository
 
 
-class CarRepository(SQLAlchemyRepository):
-    model = Car
+class UserCarRepository(SQLAlchemyRepository):
+    model = UserCar
