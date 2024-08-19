@@ -1,100 +1,51 @@
-from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field, computed_field, field_validator
+from pydantic import BaseModel, Field, computed_field
 
-from car_wash.cars.generations.schemas import GenerationRead
-from car_wash.cars.utils import validate_year_range
 from car_wash.utils.schemas import GenericListRequest
 
 
-class CarCreate(BaseModel):
-    name: str = Field(examples=['Audi A8 old'])
-    body_type_id: int = Field(examples=[1])
-    brand_id: int = Field(examples=[2])
-    model: str = Field(examples=['A8'])
-
-    year_range: str = Field(
-        examples=['2003-2010', 'past-2010', '2003-present'], exclude=True
-    )
+class UserCarCreate(BaseModel):
+    name: str = Field(examples=['My lovely car'])
+    user_id: int = Field(examples=[1])
+    configuration_id: int = Field(examples=[1])
 
     @computed_field
     @property
-    def start_year(self) -> str:
-        return self.year_range.split('-')[0]
-
-    @computed_field
-    @property
-    def end_year(self) -> str:
-        return self.year_range.split('-')[1]
-
-    @field_validator('year_range')
-    @classmethod
-    def check_year_range(cls, v: str):
-        validate_year_range(v)
-        return v
+    def is_verified(self) -> bool:
+        return False
 
 
-class CarRead(BaseModel):
+class UserCarRead(BaseModel):
     id: int
     name: str
-    body_type_id: int
-    brand_id: int
-    model: str
-    generations: list[GenerationRead]
-    start_year: int = Field(exclude=True)
-    end_year: int = Field(exclude=True)
-    created_at: datetime
+    user_id: int
+    configuration_id: int
 
     class Config:
         from_attributes = True
 
-    @computed_field
-    @property
-    def year_range(self) -> str:
-        year_start = self.start_year if self.start_year else 'past'
-        year_end = self.end_year if self.end_year else 'present'
-        if year_start == year_end:
-            return 'all'
-        return f'{year_start}-{year_end}'
+
+class UserCarList(GenericListRequest):
+    order_by: Literal['id', 'name', 'user_id', 'configuration_id'] = 'id'
 
 
-class CarList(GenericListRequest):
-    order_by: Literal[
-        'id',
-        'name',
-        'body_type_id',
-        'brand_id',
-        'model',
-        'generations',
-        'year_start',
-        'year_end',
-        'created_at',
-    ] = 'id'
-
-
-class CarUpdate(CarCreate):
-    name: str = Field(default=None, examples=['Audi A8 old'])
-    body_type_id: int = Field(default=None, examples=[1])
-    brand_id: int = Field(default=None, examples=[2])
-    model: str = Field(default=None, examples=['A8'])
-
-    year_range: str = Field(
-        default=None,
-        examples=['2003-2010', 'past-2010', '2003-present'],
-        exclude=True,
-    )
+class UserCarUpdate(BaseModel):
+    name: str = Field(default=None, examples=['My lovely car'])
+    user_id: int = Field(default=None, examples=[1])
+    configuration_id: int = Field(default=None, examples=[1])
+    is_verified: bool = Field(default=None, examples=[False])
 
 
 class CreateResponse(BaseModel):
-    car_id: int
+    user_car_id: int
 
 
-class ReadResponse(CarRead):
+class ReadResponse(UserCarRead):
     pass
 
 
-class UpdateResponse(CarRead):
+class UpdateResponse(UserCarRead):
     pass
 
 
