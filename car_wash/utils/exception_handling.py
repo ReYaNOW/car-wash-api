@@ -37,11 +37,9 @@ def handle_integrity_error(e: IntegrityError, table_name: str):
 
     not_null = NOT_NULL_PATTERN.search(original_driver_exception)
     if not_null:
-        column_name = get_values(not_null, 'column_name')
-        raise HTTPException(
-            status_code=409,
-            detail=f'Field {column_name} in {table_slug} is required',
-        )
+        column_name = get_values(not_null, 'column_name')[0]
+        msg = f'Field {column_name} is required'.replace('"', '')
+        raise HTTPException(status_code=409, detail=msg)
 
     raise HTTPException(status_code=500) from e
 
