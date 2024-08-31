@@ -7,13 +7,16 @@ from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 class UserCarCreate(BaseModel):
     name: str = Field(examples=['My lovely car'])
-    user_id: int = Field(examples=[1])
     configuration_id: int = Field(examples=[1])
 
     @computed_field
     @property
     def is_verified(self) -> bool:
         return False
+
+
+class UserCarCreateWithID(UserCarCreate):
+    user_id: int = Field(examples=[1])
 
 
 class UserCarRead(BaseModel):

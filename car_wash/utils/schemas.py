@@ -1,4 +1,10 @@
+from typing import TypeVar
+
 from pydantic import BaseModel, computed_field
+
+from car_wash.database import Base
+
+T = TypeVar('T', bound=Base)
 
 
 class GenericListRequest(BaseModel):
