@@ -19,4 +19,4 @@ class CarWash(Base):
         ForeignKey(CarWashLocation.id, ondelete='RESTRICT')
     )
 
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())

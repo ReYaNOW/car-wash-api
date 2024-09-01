@@ -13,7 +13,7 @@ class Role(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True)
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     users = relationship('User', back_populates='role')
 
@@ -31,7 +31,7 @@ class User(Base):
     confirmed: Mapped[bool] = mapped_column()
     active: Mapped[bool] = mapped_column()
     role_id: Mapped[int] = mapped_column(ForeignKey(Role.id))
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     role = relationship('Role', back_populates='users')
     cars = relationship('UserCar', back_populates='user')

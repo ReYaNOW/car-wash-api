@@ -13,7 +13,7 @@ class CarBrand(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     models: Mapped[list['CarModel']] = relationship(back_populates='brand')
 
@@ -33,7 +33,7 @@ class CarModel(Base):
     brand_id: Mapped[int] = mapped_column(
         ForeignKey(CarBrand.id, ondelete='RESTRICT')
     )
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     brand: Mapped['CarBrand'] = relationship(back_populates='models')
     generations: Mapped[list['CarGeneration']] = relationship(
@@ -58,7 +58,7 @@ class CarGeneration(Base):
     start_year: Mapped[int] = mapped_column(String(10))
     end_year: Mapped[int] = mapped_column(String(10))
 
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     model: Mapped['CarModel'] = relationship(back_populates='generations')
     configurations: Mapped[list['CarConfiguration']] = relationship(
@@ -71,7 +71,7 @@ class CarBodyType(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     configurations: Mapped[list['CarConfiguration']] = relationship(
         back_populates='body_type'
@@ -93,7 +93,7 @@ class CarConfiguration(Base):
 
     body_type_id: Mapped[str] = mapped_column(ForeignKey(CarBodyType.id))
 
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     body_type: Mapped['CarBodyType'] = relationship(
         back_populates='configurations'
@@ -118,7 +118,7 @@ class UserCar(Base):
     )
     is_verified: Mapped[bool]
 
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     user = relationship('User', back_populates='cars')
     configuration: Mapped['CarConfiguration'] = relationship(

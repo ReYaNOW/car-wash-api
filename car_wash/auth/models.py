@@ -15,4 +15,4 @@ class RefreshToken(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     token: Mapped[str] = mapped_column(unique=True, index=True)
     user_id: Mapped[str] = mapped_column(ForeignKey(User.id), index=True)
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())

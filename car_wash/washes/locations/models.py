@@ -15,4 +15,4 @@ class CarWashLocation(Base):
     city: Mapped[str] = mapped_column(String(64))
     address: Mapped[str] = mapped_column(String(64))
 
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
