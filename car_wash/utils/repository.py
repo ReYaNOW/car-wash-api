@@ -1,14 +1,14 @@
 import functools
 from abc import ABC, abstractmethod
+from typing import Any
 
-from fastapi import HTTPException
-from sqlalchemy import and_, delete, func, insert, inspect, select, update
+from sqlalchemy import and_, delete, func, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import MappedColumn, joinedload
 
-from car_wash.cars.models import UserCar
 from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import handle_integrity_error
+from car_wash.utils.schemas import T
 
 
 class AbstractRepository(ABC):
@@ -16,7 +16,15 @@ class AbstractRepository(ABC):
     async def add_one(self, data: dict) -> int:
         raise NotImplementedError
 
-    async def find_one(self, id: int, load_children: bool) -> dict:
+    async def find_one(self, id: int, load_children: list | None = None) -> T:
+        raise NotImplementedError
+
+    async def find_one_by_custom_field(
+        self,
+        custom_field: str,
+        custom_value: Any,
+        load_children: list | None = None,
+    ) -> dict:
         raise NotImplementedError
 
     @abstractmethod
@@ -26,12 +34,12 @@ class AbstractRepository(ABC):
         limit: int,
         order_by: str,
         filter_by: dict,
-        load_children: bool,
-    ) -> list:
+        load_children: list | None = None,
+    ) -> list[T]:
         raise NotImplementedError
 
     @abstractmethod
-    async def change_one(self, id: int, data: dict) -> dict:
+    async def change_one(self, id: int, data: dict) -> T:
         raise NotImplementedError
 
     @abstractmethod
@@ -52,8 +60,6 @@ class SQLAlchemyRepository(AbstractRepository):
         async def wrapper(self, *args, **kwargs):
             try:
                 result = await func(self, *args, **kwargs)
-                if result is None:
-                    raise HTTPException(status_code=404)
                 return result
             except IntegrityError as e:
                 handle_integrity_error(e, self.model.__tablename__)
@@ -69,12 +75,30 @@ class SQLAlchemyRepository(AbstractRepository):
             return res.scalar_one()
 
     @error_handler
-    async def find_one(self, id: int, load_children: bool) -> dict:
+    async def find_one(self, id: int, load_children: list | None = None) -> T:
         async with async_session_maker() as session:
             query = select(self.model).where(self.model.id == id)
 
             if load_children:
-                joined_loads = self.get_joined_loads()
+                joined_loads = self.get_joined_loads(load_children)
+                query = query.options(*joined_loads)
+
+            res = await session.execute(query)
+            return res.scalar()
+
+    @error_handler
+    async def find_one_by_custom_field(
+        self,
+        custom_field: str,
+        custom_value: Any,
+        load_children: list | None = None,
+    ) -> T:
+        column: MappedColumn = getattr(self.model, custom_field)
+        async with async_session_maker() as session:
+            query = select(self.model).where(column == custom_value)
+
+            if load_children:
+                joined_loads = self.get_joined_loads(load_children)
                 query = query.options(*joined_loads)
 
             res = await session.execute(query)
@@ -87,8 +111,8 @@ class SQLAlchemyRepository(AbstractRepository):
         limit: int,
         order_by: str,
         filters: dict,
-        load_children: bool,
-    ) -> list:
+        load_children: list | None = None,
+    ) -> list[T]:
         offset_value = page * limit - limit
         async with async_session_maker() as session:
             query = (
@@ -102,13 +126,13 @@ class SQLAlchemyRepository(AbstractRepository):
                 query = query.where(and_(*expressions))
 
             if load_children:
-                joined_loads = self.get_joined_loads()
+                joined_loads = self.get_joined_loads(load_children)
                 query = query.options(*joined_loads)
 
             res = await session.execute(query)
             return res.unique().scalars().all()
 
-    async def count_records(self, filters: dict):
+    async def count_records(self, filters: dict) -> int:
         async with async_session_maker() as session:
             query = select(func.count()).select_from(self.model)
 
@@ -120,12 +144,28 @@ class SQLAlchemyRepository(AbstractRepository):
             return res.scalar_one()
 
     @error_handler
-    async def change_one(self, id: int, data: dict) -> dict:
+    async def change_one(self, id: int, data: dict) -> T:
         async with async_session_maker() as session:
             stmt = (
                 update(self.model)
                 .values(**data)
                 .where(self.model.id == id)
+                .returning(self.model)
+            )
+            res = await session.execute(stmt)
+            await session.commit()
+            return res.scalar()
+
+    @error_handler
+    async def change_one_by_custom_field(
+        self, custom_field: str, custom_value: Any, data: dict
+    ) -> T:
+        column: MappedColumn = getattr(self.model, custom_field)
+        async with async_session_maker() as session:
+            stmt = (
+                update(self.model)
+                .values(**data)
+                .where(column == custom_value)
                 .returning(self.model)
             )
             res = await session.execute(stmt)
@@ -144,18 +184,10 @@ class SQLAlchemyRepository(AbstractRepository):
             await session.commit()
             return res
 
-    def get_joined_loads(self):
-        mapper = inspect(self.model)
-        relationships = mapper.relationships.keys()
-
-        joined_loads = []
-        for relationship in relationships:
-            joined_loads.append(joinedload(getattr(self.model, relationship)))
-
-        return joined_loads
+    def get_joined_loads(self, relationships):
+        return [joinedload(relationship) for relationship in relationships]
 
     def get_expressions(self, filters):
-        self.model: UserCar
         expressions = []
         for k, v in filters.items():
             k: str
