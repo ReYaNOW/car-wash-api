@@ -8,6 +8,9 @@ class Config(BaseSettings):
     access_token_expire_minutes: int
     refresh_token_expire_days: int
 
+    admin_username: str
+    admin_password: str
+
     debug: bool = False
     filling_db: bool = False
 
