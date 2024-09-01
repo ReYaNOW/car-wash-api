@@ -8,7 +8,7 @@ T = TypeVar('T', bound=Base)
 
 
 class GenericListRequest(BaseModel):
-    page: int
+    page: int = 1
     limit: int = 10
     order_by: str
 
