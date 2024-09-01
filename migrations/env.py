@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from car_wash.auth.models import metadata as refresh_token_metadata  # noqa
 from car_wash.cars.models import metadata as car_metadata  # noqa
 from car_wash.database import Base, async_url
 from car_wash.users.models import metadata as user_metadata  # noqa
