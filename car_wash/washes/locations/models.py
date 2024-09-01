@@ -9,7 +9,7 @@ metadata = Base.metadata
 
 
 class CarWashLocation(Base):
-    __tablename__ = 'car_wash_location'
+    __tablename__ = 'car_wash__location'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     city: Mapped[str] = mapped_column(String(64))

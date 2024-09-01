@@ -9,7 +9,7 @@ metadata = Base.metadata
 
 
 class CarBrand(Base):
-    __tablename__ = 'car_brand'
+    __tablename__ = 'car__brand'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
@@ -19,7 +19,7 @@ class CarBrand(Base):
 
 
 class CarModel(Base):
-    __tablename__ = 'car_model'
+    __tablename__ = 'car__model'
     __table_args__ = (
         UniqueConstraint(
             'name',
@@ -42,7 +42,7 @@ class CarModel(Base):
 
 
 class CarGeneration(Base):
-    __tablename__ = 'car_generation'
+    __tablename__ = 'car__generation'
     __table_args__ = (
         UniqueConstraint(
             'name',
@@ -67,7 +67,7 @@ class CarGeneration(Base):
 
 
 class CarBodyType(Base):
-    __tablename__ = 'car_body_type'
+    __tablename__ = 'car__body_type'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
@@ -79,7 +79,7 @@ class CarBodyType(Base):
 
 
 class CarConfiguration(Base):
-    __tablename__ = 'car_configuration'
+    __tablename__ = 'car__configuration'
     __table_args__ = (
         UniqueConstraint(
             'generation_id',
@@ -112,7 +112,7 @@ class UserCar(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
 
-    user_id = mapped_column(ForeignKey('users.id', ondelete='RESTRICT'))
+    user_id = mapped_column(ForeignKey('user.id', ondelete='RESTRICT'))
     configuration_id = mapped_column(
         ForeignKey(CarConfiguration.id, ondelete='RESTRICT')
     )
@@ -120,7 +120,7 @@ class UserCar(Base):
 
     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
-    user = relationship('Users', back_populates='cars')
+    user = relationship('User', back_populates='cars')
     configuration: Mapped['CarConfiguration'] = relationship(
         back_populates='user_cars'
     )
