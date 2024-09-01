@@ -31,7 +31,6 @@ class UserCreate(UserRegistration):
 class UserRead(BaseModel):
     id: int
     username: str
-    hashed_password: str
 
     first_name: str
     last_name: str
