@@ -2,72 +2,81 @@ from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 
+from car_wash.auth.dependencies import (
+    get_user_client,
+    get_validate_access_to_entity,
+    get_validate_query_user_id,
+)
 from car_wash.cars import schemas
-from car_wash.cars.body_types.router import router as body_types_router
-from car_wash.cars.brands.router import router as brands_router
-from car_wash.cars.car_models.router import router as car_models_router
-from car_wash.cars.configurations.router import router as configurations_router
-from car_wash.cars.generations.router import router as generations_router
+from car_wash.cars.models import UserCar
 from car_wash.cars.service import UserCarService
 from car_wash.config import config
+from car_wash.users.models import User
 
-router = APIRouter(prefix='/cars', tags=['Cars'])
+router = APIRouter(tags=['Cars'])
 
-# Creating separate router to separate those routes from Cars tag
-# in swagger doc
 
-sub_router = APIRouter(
+client_router = APIRouter(
+    prefix='/cars', dependencies=[Depends(get_user_client)]
+)
+client_owner_router = APIRouter(
     prefix='/cars',
-    tags=[
-        'CarBrands, CarModels, CarGenerations, CarBodyTypes, CarConfiguration'
-    ],
+    dependencies=[Depends(get_validate_access_to_entity(UserCarService))],
 )
 
-sub_router.include_router(brands_router)
-sub_router.include_router(car_models_router)
-sub_router.include_router(generations_router)
-sub_router.include_router(body_types_router)
-sub_router.include_router(configurations_router)
 
-
-@router.post('', response_model=schemas.CreateResponse)
-async def create_user_car(new_car: schemas.UserCarCreate):
-    user_car_id = await UserCarService().create_entity(new_car)
+@client_router.post('', response_model=schemas.CreateResponse)
+async def create_user_car(
+    user: Annotated[User, Depends(get_user_client)],
+    new_car: schemas.UserCarCreate,
+):
+    user_car_id = await UserCarService().create_user_car(user, new_car)
     return {'user_car_id': user_car_id}
 
 
-@router.get('/{id}', response_model=schemas.ReadResponse)
-async def read_user_car(id: int):
-    user_car = await UserCarService().read_entity(id)
+@client_owner_router.get('/{id}', response_model=schemas.ReadResponse)
+async def read_user_car(
+    user_car: Annotated[
+        UserCar, Depends(get_validate_access_to_entity(UserCarService))
+    ],
+):
     return user_car
 
 
-@router.get('', response_model=schemas.ListResponse)
-async def list_user_cars(query: Annotated[schemas.UserCarList, Depends()]):
+@client_router.get('', response_model=schemas.ListResponse)
+async def list_user_cars(
+    query: Annotated[
+        schemas.UserCarList,
+        Depends(get_validate_query_user_id(schemas.UserCarList)),
+    ],
+):
     paginated_cars = await UserCarService().paginate_entities(query)
     return paginated_cars
 
 
-@router.patch(
+@client_owner_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
     description='Update certain fields of existing user car',
 )
-async def update_car(id: int, new_values: schemas.UserCarUpdate):
+async def update_user_car(id: int, new_values: schemas.UserCarUpdate):
     updated_user_car = await UserCarService().update_entity(id, new_values)
     return updated_user_car
 
 
-@router.delete('/{id}', response_model=schemas.DeleteResponse)
-async def delete_car(id: int):
+@client_owner_router.delete('/{id}', response_model=schemas.DeleteResponse)
+async def delete_user_car(id: int):
     id_ = await UserCarService().delete_entity(id)
     return {'detail': f'User car successfully deleted with id: {id_}'}
 
 
+router.include_router(client_router)
+router.include_router(client_owner_router)
+
 if config.debug:
     from car_wash.utils.fill_db_with_cars import fill_db
 
-    @router.post('/fill_db_with_cars')
+    @router.post('cars/fill_db_with_cars')
     async def fill_db_with_cars(background_tasks: BackgroundTasks):
         if config.filling_db:
             return 'Database is already filling up'

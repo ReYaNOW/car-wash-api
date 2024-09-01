@@ -2,31 +2,39 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from car_wash.auth.dependencies import get_user_admin, get_user_client
 from car_wash.cars.brands import schemas
 from car_wash.cars.brands.service import CarBrandService
 
-router = APIRouter(prefix='/brands')
+router = APIRouter()
+
+client_router = APIRouter(
+    prefix='/brands', dependencies=[Depends(get_user_client)]
+)
+admin_router = APIRouter(
+    prefix='/brands', dependencies=[Depends(get_user_admin)]
+)
 
 
-@router.post('', response_model=schemas.CreateResponse)
+@admin_router.post('', response_model=schemas.CreateResponse)
 async def create_brand(new_brand: schemas.BrandCreate):
     brand_id = await CarBrandService().create_entity(new_brand)
     return {'brand_id': brand_id}
 
 
-@router.get('/{id}', response_model=schemas.ReadResponse)
+@client_router.get('/{id}', response_model=schemas.ReadResponse)
 async def read_brand(id: int):
     brand = await CarBrandService().read_entity(id)
     return brand
 
 
-@router.get('', response_model=schemas.ListResponse)
+@client_router.get('', response_model=schemas.ListResponse)
 async def list_brands(query: Annotated[schemas.BrandList, Depends()]):
     paginated_brands = await CarBrandService().paginate_entities(query)
     return paginated_brands
 
 
-@router.patch(
+@admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
     description='Update certain fields of existing brand',
@@ -36,7 +44,11 @@ async def update_brand(id: int, new_values: schemas.BrandUpdate):
     return updated_brand
 
 
-@router.delete('/{id}', response_model=schemas.DeleteResponse)
+@admin_router.delete('/{id}', response_model=schemas.DeleteResponse)
 async def delete_brand(id: int):
     id_ = await CarBrandService().delete_entity(id)
     return {'detail': f'Brand successfully deleted with id: {id_}'}
+
+
+router.include_router(client_router)
+router.include_router(admin_router)

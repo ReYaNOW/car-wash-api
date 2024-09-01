@@ -2,36 +2,44 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from car_wash.auth.dependencies import get_user_admin, get_user_client
 from car_wash.washes import schemas
 from car_wash.washes.locations.router import router as locations_router
 from car_wash.washes.service import CarWashService
 
-router = APIRouter(prefix='/car_washes', tags=['CarWashes'])
+router = APIRouter(tags=['CarWashes'])
 
 sub_router = APIRouter(prefix='/car_washes', tags=['CarWashLocations'])
 
 sub_router.include_router(locations_router)
 
+client_router = APIRouter(
+    prefix='/car_washes', dependencies=[Depends(get_user_client)]
+)
+admin_router = APIRouter(
+    prefix='/car_washes', dependencies=[Depends(get_user_admin)]
+)
 
-@router.post('', response_model=schemas.CreateResponse)
+
+@admin_router.post('', response_model=schemas.CreateResponse)
 async def create_car_wash(new_car_wash: schemas.CarWashCreate):
     car_wash_id = await CarWashService().create_entity(new_car_wash)
     return {'car_wash_id': car_wash_id}
 
 
-@router.get('/{id}', response_model=schemas.ReadResponse)
+@client_router.get('/{id}', response_model=schemas.ReadResponse)
 async def read_car_wash(id: int):
     car_wash = await CarWashService().read_entity(id)
     return car_wash
 
 
-@router.get('', response_model=list[schemas.ReadResponse])
+@client_router.get('', response_model=list[schemas.ReadResponse])
 async def list_car_washes(query: Annotated[schemas.CarWashList, Depends()]):
     car_washes = await CarWashService().paginate_entities(query)
     return car_washes
 
 
-@router.patch(
+@admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
     description='Update certain fields of existing car wash',
@@ -41,7 +49,11 @@ async def update_car_wash(id: int, new_values: schemas.CarWashUpdate):
     return updated_car_wash
 
 
-@router.delete('/{id}', response_model=schemas.DeleteResponse)
+@admin_router.delete('/{id}', response_model=schemas.DeleteResponse)
 async def delete_car_wash(id: int):
     id_ = await CarWashService().delete_entity(id)
     return {'detail': f'Car wash successfully deleted with id: {id_}'}
+
+
+router.include_router(client_router)
+router.include_router(admin_router)

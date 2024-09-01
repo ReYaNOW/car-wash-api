@@ -2,13 +2,21 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
+from car_wash.auth.dependencies import get_user_admin, get_user_client
 from car_wash.cars.configurations import schemas
 from car_wash.cars.configurations.service import CarConfigurationService
 
-router = APIRouter(prefix='/configurations')
+router = APIRouter()
+
+client_router = APIRouter(
+    prefix='/configurations', dependencies=[Depends(get_user_client)]
+)
+admin_router = APIRouter(
+    prefix='/configurations', dependencies=[Depends(get_user_admin)]
+)
 
 
-@router.post('', response_model=schemas.CreateResponse)
+@admin_router.post('', response_model=schemas.CreateResponse)
 async def create_configuration(new_configuration: schemas.ConfigurationCreate):
     configuration_id = await CarConfigurationService().create_entity(
         new_configuration
@@ -16,13 +24,13 @@ async def create_configuration(new_configuration: schemas.ConfigurationCreate):
     return {'configuration_id': configuration_id}
 
 
-@router.get('/{id}', response_model=schemas.ReadResponse)
+@client_router.get('/{id}', response_model=schemas.ReadResponse)
 async def read_configuration(id: int):
     configuration = await CarConfigurationService().read_entity(id)
     return configuration
 
 
-@router.get('', response_model=schemas.ListResponse)
+@client_router.get('', response_model=schemas.ListResponse)
 async def list_configurations(
     query: Annotated[schemas.ConfigurationList, Depends()],
 ):
@@ -32,7 +40,7 @@ async def list_configurations(
     return paginated_configurations
 
 
-@router.patch(
+@admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
     description='Update certain fields of existing configuration',
@@ -46,7 +54,11 @@ async def update_configuration(
     return updated_configuration
 
 
-@router.delete('/{id}', response_model=schemas.DeleteResponse)
+@admin_router.delete('/{id}', response_model=schemas.DeleteResponse)
 async def delete_configuration(id: int):
     id_ = await CarConfigurationService().delete_entity(id)
     return {'detail': f'Configuration successfully deleted with id: {id_}'}
+
+
+router.include_router(client_router)
+router.include_router(admin_router)
