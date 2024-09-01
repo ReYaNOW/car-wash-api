@@ -1,4 +1,5 @@
 import pydantic
+from fastapi import HTTPException
 
 from car_wash.utils.repository import AbstractRepository
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
@@ -16,7 +17,9 @@ class GenericCRUDService:
         return entity_id
 
     async def read_entity(self, id: int):
-        entity = await self.crud_repo.find_one(id, load_children=True)
+        entity = await self.crud_repo.find_one(id)
+        if entity is None:
+            raise HTTPException(status_code=404)
         return entity
 
     async def paginate_entities(self, query: GenericListRequest):
@@ -29,7 +32,7 @@ class GenericCRUDService:
         filters = {k: v for k, v in query.items() if v is not None}
 
         entities = await self.crud_repo.find_many(
-            page, limit, order_by, filters, load_children=True
+            page, limit, order_by, filters
         )
         total_records = await self.crud_repo.count_records(filters)
         pages = (total_records + limit - 1) // limit
@@ -38,8 +41,12 @@ class GenericCRUDService:
     async def update_entity(self, id: int, new_values: pydantic.BaseModel):
         new_values_dict = new_values.model_dump(exclude_none=True)
         updated_entity = await self.crud_repo.change_one(id, new_values_dict)
+        if updated_entity is None:
+            raise HTTPException(status_code=404)
         return updated_entity
 
     async def delete_entity(self, id: int) -> int:
         id_ = await self.crud_repo.delete_one(id)
+        if id_ is None:
+            raise HTTPException(status_code=404)
         return id_
