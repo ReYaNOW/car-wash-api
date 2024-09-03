@@ -40,6 +40,8 @@ class BookingRead(BaseModel):
 
 class BookingList(GenericListRequest):
     order_by: Literal['id', 'created_at'] = 'id'
+    user_id: int | None = None
+    car_wash_id: int | None = None
 
 
 class BookingUpdate(BookingCreate):
