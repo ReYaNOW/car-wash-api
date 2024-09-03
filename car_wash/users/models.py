@@ -35,3 +35,4 @@ class User(Base):
 
     role = relationship('Role', back_populates='users')
     cars = relationship('UserCar', back_populates='user')
+    bookings = relationship('Booking', back_populates='user')
