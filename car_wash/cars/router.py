@@ -76,7 +76,7 @@ router.include_router(client_owner_router)
 if config.debug:
     from car_wash.utils.fill_db_with_cars import fill_db
 
-    @router.post('cars/fill_db_with_cars')
+    @router.post('/cars/fill_db_with_cars')
     async def fill_db_with_cars(background_tasks: BackgroundTasks):
         if config.filling_db:
             return 'Database is already filling up'
