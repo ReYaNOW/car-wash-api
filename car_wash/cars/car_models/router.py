@@ -2,18 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_admin, get_user_client
 from car_wash.cars.car_models import schemas
 from car_wash.cars.car_models.service import CarModelService
+from car_wash.utils.router import get_admin_router, get_client_router
 
 router = APIRouter()
 
-client_router = APIRouter(
-    prefix='/models', dependencies=[Depends(get_user_client)]
-)
-admin_router = APIRouter(
-    prefix='/models', dependencies=[Depends(get_user_admin)]
-)
+client_router = get_client_router('/models')
+admin_router = get_admin_router('/models')
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)
@@ -37,7 +33,7 @@ async def list_models(query: Annotated[schemas.ModelList, Depends()]):
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing model',
+    summary='Update certain fields of existing model',
 )
 async def update_model(id: int, new_values: schemas.ModelUpdate):
     updated_model = await CarModelService().update_entity(id, new_values)

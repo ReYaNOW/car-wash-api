@@ -2,18 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_admin, get_user_client
 from car_wash.cars.body_types import schemas
 from car_wash.cars.body_types.service import CarBodyTypeService
+from car_wash.utils.router import get_admin_router, get_client_router
 
 router = APIRouter()
 
-client_router = APIRouter(
-    prefix='/body_types', dependencies=[Depends(get_user_client)]
-)
-admin_router = APIRouter(
-    prefix='/body_types', dependencies=[Depends(get_user_admin)]
-)
+client_router = get_client_router('/body_types')
+admin_router = get_admin_router('/body_types')
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)
@@ -37,7 +33,7 @@ async def list_body_types(query: Annotated[schemas.BodyTypeList, Depends()]):
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing body type',
+    summary='Update certain fields of existing body type',
 )
 async def update_body_type(id: int, new_values: schemas.BodyTypeUpdate):
     updated_body_type = await CarBodyTypeService().update_entity(

@@ -12,17 +12,12 @@ from car_wash.cars.models import UserCar
 from car_wash.cars.service import UserCarService
 from car_wash.config import config
 from car_wash.users.models import User
+from car_wash.utils.router import OWNER, get_client_router, get_owner_router
 
 router = APIRouter(tags=['Cars'])
 
-
-client_router = APIRouter(
-    prefix='/cars', dependencies=[Depends(get_user_client)]
-)
-client_owner_router = APIRouter(
-    prefix='/cars',
-    dependencies=[Depends(get_validate_access_to_entity(UserCarService))],
-)
+client_router = get_client_router('/cars')
+client_owner_router = get_owner_router('/cars', UserCarService)
 
 
 @client_router.post('', response_model=schemas.CreateResponse)
@@ -43,7 +38,7 @@ async def read_user_car(
     return user_car
 
 
-@client_router.get('', response_model=schemas.ListResponse)
+@client_router.get('', response_model=schemas.ListResponse, description=OWNER)
 async def list_user_cars(
     query: Annotated[
         schemas.UserCarList,
@@ -57,7 +52,7 @@ async def list_user_cars(
 @client_owner_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing user car',
+    summary='Update certain fields of existing user car',
 )
 async def update_user_car(id: int, new_values: schemas.UserCarUpdate):
     updated_user_car = await UserCarService().update_entity(id, new_values)

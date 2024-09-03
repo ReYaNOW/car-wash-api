@@ -2,18 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_admin, get_user_client
+from car_wash.utils.router import get_admin_router, get_client_router
 from car_wash.washes.schedules import schemas
 from car_wash.washes.schedules.service import ScheduleService
 
 router = APIRouter()
 
-client_router = APIRouter(
-    prefix='/schedules', dependencies=[Depends(get_user_client)]
-)
-admin_router = APIRouter(
-    prefix='/schedules', dependencies=[Depends(get_user_admin)]
-)
+client_router = get_client_router('/schedules')
+admin_router = get_admin_router('/schedules')
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)

@@ -2,18 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_admin, get_user_client
 from car_wash.cars.configurations import schemas
 from car_wash.cars.configurations.service import CarConfigurationService
+from car_wash.utils.router import get_admin_router, get_client_router
 
 router = APIRouter()
 
-client_router = APIRouter(
-    prefix='/configurations', dependencies=[Depends(get_user_client)]
-)
-admin_router = APIRouter(
-    prefix='/configurations', dependencies=[Depends(get_user_admin)]
-)
+client_router = get_client_router('/configurations')
+admin_router = get_admin_router('/configurations')
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)
@@ -43,7 +39,7 @@ async def list_configurations(
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing configuration',
+    summary='Update certain fields of existing configuration',
 )
 async def update_configuration(
     id: int, new_values: schemas.ConfigurationUpdate

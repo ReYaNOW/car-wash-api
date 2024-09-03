@@ -2,18 +2,14 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_admin, get_user_client
+from car_wash.utils.router import get_admin_router, get_client_router
 from car_wash.washes.locations import schemas
 from car_wash.washes.locations.service import CarWashLocationService
 
 router = APIRouter(tags=['Locations'])
 
-client_router = APIRouter(
-    prefix='/locations', dependencies=[Depends(get_user_client)]
-)
-admin_router = APIRouter(
-    prefix='/locations', dependencies=[Depends(get_user_admin)]
-)
+client_router = get_client_router('/locations')
+admin_router = get_admin_router('/locations')
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)
@@ -39,7 +35,7 @@ async def list_locations(
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing location',
+    summary='Update certain fields of existing location',
 )
 async def update_location(id: int, new_values: schemas.CarWashLocationUpdate):
     updated_location = await CarWashLocationService().update_entity(
