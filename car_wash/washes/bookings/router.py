@@ -1,0 +1,58 @@
+from typing import Annotated
+
+from fastapi import APIRouter, Depends
+
+from car_wash.auth.dependencies import get_user_admin, get_user_client
+from car_wash.users.models import User
+from car_wash.washes.bookings import schemas
+from car_wash.washes.bookings.service import BookingService
+
+router = APIRouter()
+
+client_router = APIRouter(
+    prefix='/bookings', dependencies=[Depends(get_user_client)]
+)
+admin_router = APIRouter(
+    prefix='/bookings', dependencies=[Depends(get_user_admin)]
+)
+
+
+@admin_router.post('', response_model=schemas.CreateResponse)
+async def create_booking(
+    user: Annotated[User, Depends(get_user_admin)],
+    new_booking: schemas.BookingCreate,
+):
+    booking_id = await BookingService().create_booking(user, new_booking)
+    return {'booking_id': booking_id}
+
+
+@client_router.get('/{id}', response_model=schemas.ReadResponse)
+async def read_booking(id: int):
+    booking = await BookingService().read_entity(id)
+    return booking
+
+
+@client_router.get('', response_model=schemas.ListResponse)
+async def list_bookings(query: Annotated[schemas.BookingList, Depends()]):
+    paginated_bookings = await BookingService().paginate_entities(query)
+    return paginated_bookings
+
+
+@admin_router.patch(
+    '/{id}',
+    response_model=schemas.UpdateResponse,
+    description='Update certain fields of existing booking',
+)
+async def update_booking(id: int, new_values: schemas.BookingUpdate):
+    updated_booking = await BookingService().update_entity(id, new_values)
+    return updated_booking
+
+
+@admin_router.delete('/{id}', response_model=schemas.DeleteResponse)
+async def delete_booking(id: int):
+    id_ = await BookingService().delete_entity(id)
+    return {'detail': f'booking successfully deleted with id: {id_}'}
+
+
+router.include_router(client_router)
+router.include_router(admin_router)

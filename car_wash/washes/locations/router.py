@@ -28,7 +28,7 @@ async def read_location(id: int):
     return location
 
 
-@client_router.get('', response_model=list[schemas.ReadResponse])
+@client_router.get('', response_model=schemas.ListResponse)
 async def list_locations(
     query: Annotated[schemas.CarWashLocationList, Depends()],
 ):
@@ -52,3 +52,7 @@ async def update_location(id: int, new_values: schemas.CarWashLocationUpdate):
 async def delete_location(id: int):
     id_ = await CarWashLocationService().delete_entity(id)
     return {'detail': f'Location successfully deleted with id: {id_}'}
+
+
+router.include_router(client_router)
+router.include_router(admin_router)
