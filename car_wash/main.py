@@ -43,8 +43,8 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(car_wash_locations_router)
 app.include_router(car_washes_router)
 app.include_router(sub_cars_router)
 app.include_router(cars_router)
-app.include_router(users_router)
