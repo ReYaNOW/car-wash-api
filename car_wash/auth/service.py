@@ -156,8 +156,8 @@ class AuthService:
         )
 
     async def create_refresh_token_in_db(self, token: str, user_id: int):
-        return await self.refresh_token_repo.change_one_by_custom_field(
-            'user_id', user_id, {'token': token}
+        return await self.refresh_token_repo.add_one(
+            {'token': token, 'user_id': user_id}
         )
 
     async def read_user_by_name(self, username) -> User:
