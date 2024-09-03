@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from car_wash.utils.schemas import GenericListRequest
+from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class CarWashCreate(BaseModel):
@@ -43,9 +43,17 @@ class ReadResponse(CarWashRead):
     pass
 
 
+class ListResponse(GenericListResponse):
+    data: list[CarWashRead]
+
+
 class UpdateResponse(CarWashRead):
     pass
 
 
 class DeleteResponse(BaseModel):
     detail: str
+
+
+class AvailableTimesResponse(BaseModel):
+    available_times: list[tuple[datetime, datetime]]
