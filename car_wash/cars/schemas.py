@@ -15,10 +15,6 @@ class UserCarCreate(BaseModel):
         return False
 
 
-class UserCarCreateWithID(UserCarCreate):
-    user_id: int = Field(examples=[1])
-
-
 class UserCarRead(BaseModel):
     id: int
     name: str
