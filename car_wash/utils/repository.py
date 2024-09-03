@@ -51,20 +51,20 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
 
+def error_handler(func):
+    @functools.wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        try:
+            result = await func(self, *args, **kwargs)
+            return result
+        except IntegrityError as e:
+            handle_integrity_error(e, self.model.__tablename__)
+
+    return wrapper
+
+
 class SQLAlchemyRepository(AbstractRepository):
     model = None
-
-    @staticmethod
-    def error_handler(func):
-        @functools.wraps(func)
-        async def wrapper(self, *args, **kwargs):
-            try:
-                result = await func(self, *args, **kwargs)
-                return result
-            except IntegrityError as e:
-                handle_integrity_error(e, self.model.__tablename__)
-
-        return wrapper
 
     @error_handler
     async def add_one(self, data: dict) -> int:
