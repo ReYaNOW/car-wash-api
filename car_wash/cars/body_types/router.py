@@ -48,5 +48,5 @@ async def delete_body_type(id: int):
     return {'detail': f'Body type successfully deleted with id: {id_}'}
 
 
-router.include_router(client_router)
 router.include_router(admin_router)
+router.include_router(client_router)

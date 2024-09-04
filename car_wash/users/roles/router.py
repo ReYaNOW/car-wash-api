@@ -33,7 +33,7 @@ async def list_roles(query: Annotated[schemas.RoleList, Depends()]):
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing role',
+    summary='Update certain fields of existing role',
 )
 async def update_role(id: int, new_values: schemas.RoleUpdate):
     updated_role = await RoleService().update_entity(id, new_values)
@@ -46,5 +46,5 @@ async def delete_role(id: int):
     return {'detail': f'role successfully deleted with id: {id_}'}
 
 
-router.include_router(client_router)
 router.include_router(admin_router)
+router.include_router(client_router)

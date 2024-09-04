@@ -52,5 +52,5 @@ async def delete_generation(id: int):
     return {'detail': f'Generation successfully deleted with id: {id_}'}
 
 
-router.include_router(client_router)
 router.include_router(admin_router)
+router.include_router(client_router)

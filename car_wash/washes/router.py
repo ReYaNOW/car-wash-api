@@ -44,7 +44,7 @@ async def list_car_washes(query: Annotated[schemas.CarWashList, Depends()]):
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing car wash',
+    summary='Update certain fields of existing car wash',
 )
 async def update_car_wash(id: int, new_values: schemas.CarWashUpdate):
     updated_car_wash = await CarWashService().update_entity(id, new_values)
@@ -65,5 +65,5 @@ async def get_available_times(id: int, date: datetime.date):
     return {'available_times': available_times}
 
 
-router.include_router(client_router)
 router.include_router(admin_router)
+router.include_router(client_router)

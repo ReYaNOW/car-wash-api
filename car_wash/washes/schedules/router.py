@@ -33,7 +33,7 @@ async def list_schedules(query: Annotated[schemas.ScheduleList, Depends()]):
 @admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
-    description='Update certain fields of existing schedule',
+    summary='Update certain fields of existing schedule',
 )
 async def update_schedule(id: int, new_values: schemas.ScheduleUpdate):
     updated_schedule = await ScheduleService().update_entity(id, new_values)
@@ -46,5 +46,5 @@ async def delete_schedule(id: int):
     return {'detail': f'Schedule successfully deleted with id: {id_}'}
 
 
-router.include_router(client_router)
 router.include_router(admin_router)
+router.include_router(client_router)
