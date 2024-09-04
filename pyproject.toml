@@ -15,6 +15,7 @@ pydantic-settings = "^2.4.0"
 parse = "^1.20.2"
 pyjwt = "^2.9.0"
 passlib = {extras = ["argon2"], version = "^1.7.4"}
+psycopg2-binary = "^2.9.9"
 
 
 [tool.poetry.group.dev.dependencies]
