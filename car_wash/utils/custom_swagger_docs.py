@@ -74,6 +74,7 @@ def custom_swagger_ui_html(
                   url: '{openapi_url}',
                   {prms}
                   persistAuthorization: true,
+                  defaultModelsExpandDepth: 0,
                   presets: [
                     SwaggerUIBundle.presets.apis,
                     SwaggerUIStandalonePreset
