@@ -6,10 +6,10 @@ from car_wash.utils.router import get_admin_router, get_client_router
 from car_wash.washes.locations import schemas
 from car_wash.washes.locations.service import CarWashLocationService
 
-router = APIRouter(tags=['Locations'])
+router = APIRouter()
 
-client_router = get_client_router('/locations')
-admin_router = get_admin_router('/locations')
+client_router = get_client_router('/locations', tags=['CarWashes|Locations'])
+admin_router = get_admin_router('/locations', tags=['CarWashes|Locations'])
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)

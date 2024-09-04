@@ -3,29 +3,22 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_admin, get_user_client
+from car_wash.utils.router import get_admin_router, get_client_router
 from car_wash.washes import schemas
 from car_wash.washes.bookings.router import router as bookings_router
 from car_wash.washes.locations.router import router as locations_router
 from car_wash.washes.schedules.router import router as schedules_router
 from car_wash.washes.service import CarWashService
 
-router = APIRouter(tags=['CarWashes'])
+router = APIRouter()
 
-sub_router = APIRouter(
-    prefix='/car_washes',
-    tags=['CarWashBookings, CarWashSchedules, CarWashLocations'],
-)
+sub_router = APIRouter(prefix='/car_washes')
 sub_router.include_router(bookings_router)
 sub_router.include_router(schedules_router)
 sub_router.include_router(locations_router)
 
-client_router = APIRouter(
-    prefix='/car_washes', dependencies=[Depends(get_user_client)]
-)
-admin_router = APIRouter(
-    prefix='/car_washes', dependencies=[Depends(get_user_admin)]
-)
+client_router = get_client_router('/car_washes', tags=['CarWashes'])
+admin_router = get_admin_router('/car_washes', tags=['CarWashes'])
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)

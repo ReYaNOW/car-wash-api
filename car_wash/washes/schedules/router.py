@@ -8,8 +8,8 @@ from car_wash.washes.schedules.service import ScheduleService
 
 router = APIRouter()
 
-client_router = get_client_router('/schedules')
-admin_router = get_admin_router('/schedules')
+client_router = get_client_router('/schedules', tags=['CarWashes|Schedules'])
+admin_router = get_admin_router('/schedules', tags=['CarWashes|Schedules'])
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)

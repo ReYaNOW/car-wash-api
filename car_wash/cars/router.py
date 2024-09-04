@@ -10,14 +10,17 @@ from car_wash.auth.dependencies import (
 from car_wash.cars import schemas
 from car_wash.cars.models import UserCar
 from car_wash.cars.service import UserCarService
+from car_wash.cars.sub_router import sub_router
 from car_wash.config import config
 from car_wash.users.models import User
 from car_wash.utils.router import OWNER, get_client_router, get_owner_router
 
-router = APIRouter(tags=['Cars'])
+router = APIRouter()
 
-client_router = get_client_router('/cars')
-client_owner_router = get_owner_router('/cars', UserCarService)
+router.include_router(sub_router)
+
+client_router = get_client_router('/cars', tags=['Cars'])
+client_owner_router = get_owner_router('/cars', UserCarService, tags=['Cars'])
 
 
 @client_router.post('', response_model=schemas.CreateResponse)

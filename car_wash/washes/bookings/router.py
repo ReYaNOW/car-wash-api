@@ -13,8 +13,10 @@ from car_wash.washes.bookings.service import BookingService
 
 router = APIRouter()
 
-client_router = get_client_router('/bookings')
-client_owner_router = get_owner_router('/bookings', BookingService)
+client_router = get_client_router('/bookings', tags=['CarWashes|Bookings'])
+client_owner_router = get_owner_router(
+    '/bookings', BookingService, tags=['CarWashes|Bookings']
+)
 
 
 @client_router.post('', response_model=schemas.CreateResponse)

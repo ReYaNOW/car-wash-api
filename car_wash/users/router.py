@@ -9,15 +9,15 @@ from car_wash.users.roles.router import router as roles_router
 from car_wash.users.service import UserService
 from car_wash.utils.router import get_admin_router, get_client_router
 
-router = APIRouter(tags=['Users'])
+router = APIRouter()
 
 router.include_router(roles_router)
 
-client_router = get_client_router('/users')
-admin_router = get_admin_router('/users')
+client_router = get_client_router('/users', tags=['Users'])
+admin_router = get_admin_router('/users', tags=['Users'])
 
 
-@client_router.post('/me', response_model=schemas.UserRead)
+@client_router.get('/me', response_model=schemas.UserRead)
 async def show_logged_user(user: Annotated[User, Depends(get_user_client)]):
     return user
 

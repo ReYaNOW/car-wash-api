@@ -8,8 +8,8 @@ from car_wash.utils.router import get_admin_router, get_client_router
 
 router = APIRouter()
 
-client_router = get_client_router('/body_types')
-admin_router = get_admin_router('/body_types')
+client_router = get_client_router('/body_types', tags=['Cars|BodyTypes'])
+admin_router = get_admin_router('/body_types', tags=['Cars|BodyTypes'])
 
 
 @admin_router.post('', response_model=schemas.CreateResponse)

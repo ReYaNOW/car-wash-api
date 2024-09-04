@@ -25,25 +25,28 @@ class CustomRouter(APIRouter):
         super().add_api_route(path, endpoint, **kwargs)
 
 
-def get_client_router(prefix: str):
+def get_client_router(prefix: str, tags: list[str]):
     return CustomRouter(
         prefix=prefix,
+        tags=tags,
         default_description=CLIENT,
         dependencies=[Depends(get_user_client)],
     )
 
 
-def get_owner_router(prefix: str, service):
+def get_owner_router(prefix: str, service, tags: list[str]):
     return CustomRouter(
         prefix=prefix,
+        tags=tags,
         default_description=OWNER,
         dependencies=[Depends(get_validate_access_to_entity(service))],
     )
 
 
-def get_admin_router(prefix: str):
+def get_admin_router(prefix: str, tags: list[str]):
     return CustomRouter(
         prefix=prefix,
+        tags=tags,
         default_description=ADMIN,
         dependencies=[Depends(get_user_admin)],
     )
