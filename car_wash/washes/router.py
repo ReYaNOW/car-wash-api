@@ -13,9 +13,11 @@ from car_wash.washes.service import CarWashService
 router = APIRouter()
 
 sub_router = APIRouter(prefix='/car_washes')
-sub_router.include_router(bookings_router)
-sub_router.include_router(schedules_router)
+
 sub_router.include_router(locations_router)
+sub_router.include_router(schedules_router)
+sub_router.include_router(bookings_router)
+
 
 client_router = get_client_router('/car_washes', tags=['CarWashes'])
 admin_router = get_admin_router('/car_washes', tags=['CarWashes'])
