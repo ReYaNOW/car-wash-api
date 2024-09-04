@@ -9,23 +9,21 @@ from car_wash.auth.exceptions import (
     user_id_is_not_set_exc,
 )
 from car_wash.auth.schemas import oauth2_scheme
-from car_wash.auth.service import AuthService
+from car_wash.auth.utils import TokenService, get_token_service
 from car_wash.users.models import User
 from car_wash.users.schemas import UserReadWithRole
+from car_wash.users.service import UserService, get_user_service
 from car_wash.utils.schemas import GenericListRequest
 from car_wash.utils.service import GenericCRUDService
 
 
-async def get_auth_service():
-    return AuthService()
-
-
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
-    service: Annotated[AuthService, Depends(get_auth_service)],
+    token_service: Annotated[TokenService, Depends(get_token_service)],
+    user_service: Annotated[UserService, Depends(get_user_service)],
 ):
-    token_data = service.process_token(token, token_type='access')
-    user = await service.read_user_with_role(id=token_data.user_id)
+    user_id = token_service.process_token(token, token_type='access')
+    user = await user_service.read_user_with_role(id=user_id)
 
     if user is None:
         raise credentials_exc

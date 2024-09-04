@@ -3,9 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from car_wash.auth.dependencies import get_auth_service
 from car_wash.auth.schemas import Tokens, oauth2_scheme
-from car_wash.auth.service import AuthService
+from car_wash.auth.service import AuthService, get_auth_service
 from car_wash.users.schemas import UserRegistration
 
 router = APIRouter(prefix='/jwt', tags=['JWT'])

@@ -5,22 +5,26 @@ Revises: 5e76a7f6e1c9
 Create Date: 2024-09-01 16:03:46.713770
 
 """
-from typing import Sequence, Union
 import asyncio
+from typing import Sequence, Union
 
 import sqlalchemy as sa
 from sqlalchemy import select
 
-from car_wash.auth.utils import get_pass_hash
+from car_wash.auth.utils import PasswordService
 from car_wash.config import config
-from car_wash.users.models import Role, User
 from car_wash.database import async_session_maker
+from car_wash.users.models import Role, User
 
 # revision identifiers, used by Alembic.
 revision: str = 'ac9c94aad02a'
 down_revision: Union[str, None] = '5e76a7f6e1c9'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
+
+token_service = PasswordService()
+get_pass_hash = token_service.get_pass_hash
 
 
 async def add_initial_data():
@@ -51,7 +55,8 @@ async def add_initial_data():
 
         if not admin_user.scalars().first():
             admin_role_result = await session.execute(
-                select(Role).filter_by(name='admin'))
+                select(Role).filter_by(name='admin')
+            )
             admin_role = admin_role_result.scalars().first()
 
             hashed_pass = get_pass_hash(config.admin_password)
@@ -68,7 +73,8 @@ async def add_initial_data():
 
         if not client_user.scalars().first():
             client_role_result = await session.execute(
-                select(Role).filter_by(name='client'))
+                select(Role).filter_by(name='client')
+            )
             client_role = client_role_result.scalars().first()
 
             hashed_pass = get_pass_hash('user_pass')

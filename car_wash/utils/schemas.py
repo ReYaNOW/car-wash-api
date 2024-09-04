@@ -4,7 +4,7 @@ from pydantic import BaseModel, computed_field
 
 from car_wash.database import Base
 
-T = TypeVar('T', bound=Base)
+AnyModel = TypeVar('AnyModel', bound=Base)
 
 
 class GenericListRequest(BaseModel):

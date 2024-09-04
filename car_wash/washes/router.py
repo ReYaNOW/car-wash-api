@@ -67,7 +67,6 @@ async def delete_car_wash(id: int):
 )
 async def get_available_times(id: int, date: datetime.date):
     available_times = await CarWashService().get_available_times(id, date)
-    print(available_times[0])
     return {'available_times': available_times}
 
 

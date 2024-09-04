@@ -2,7 +2,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from car_wash.auth.utils import pwd_context
-from car_wash.users.schemas import UserRegistration
+from car_wash.users.schemas import UserRead, UserRegistration
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='jwt/token')
 
@@ -44,8 +44,8 @@ class UserForDB(UserRegistration):
         return v
 
 
-class UserInDB(BaseModel):
-    id: int
+class UserInDB(UserRead):
+    hashed_password: str = Field(default=None, exclude=True)
 
     class Config:
         from_attributes = True
