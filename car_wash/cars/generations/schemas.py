@@ -26,21 +26,21 @@ class GenerationCreate(BaseModel):
     @property
     def start_year(self) -> str | None:
         if self.year_range is None:
-            return
+            return None
         return self.year_range.split('-')[0]
 
     @computed_field
     @property
     def end_year(self) -> str | None:
         if self.year_range is None:
-            return
+            return None
         return self.year_range.split('-')[1]
 
     @field_validator('year_range')
     @classmethod
-    def check_year_range(cls, v: str):
+    def check_year_range(cls, v: str) -> str | None:
         if v is None:
-            return
+            return None
         validate_year_range(v)
         return v
 
