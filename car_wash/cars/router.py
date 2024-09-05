@@ -13,7 +13,7 @@ from car_wash.cars.service import UserCarService
 from car_wash.cars.sub_router import sub_router
 from car_wash.config import config
 from car_wash.users.models import User
-from car_wash.utils.router import OWNER, get_client_router, get_owner_router
+from car_wash.utils.routers import OWNER, get_client_router, get_owner_router
 
 router = APIRouter()
 

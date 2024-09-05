@@ -7,7 +7,7 @@ from car_wash.users import schemas
 from car_wash.users.models import User
 from car_wash.users.roles.router import router as roles_router
 from car_wash.users.service import UserService
-from car_wash.utils.router import get_admin_router, get_client_router
+from car_wash.utils.routers import get_admin_router, get_client_router
 
 router = APIRouter()
 

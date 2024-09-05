@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from car_wash.cars.brands import schemas
 from car_wash.cars.brands.service import CarBrandService
-from car_wash.utils.router import get_admin_router, get_client_router
+from car_wash.utils.routers import get_admin_router, get_client_router
 
 router = APIRouter()
 

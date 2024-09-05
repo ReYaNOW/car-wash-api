@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 
 from car_wash.auth.dependencies import get_user_admin
 from car_wash.users.models import User
-from car_wash.utils.router import (
+from car_wash.utils.routers import (
     get_client_router,
     get_owner_router,
 )
