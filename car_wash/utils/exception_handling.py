@@ -1,11 +1,12 @@
 import functools
-from typing import Callable, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Callable, ParamSpec, TypeVar
 
 from fastapi import HTTPException
 from parse import Result, compile
 from sqlalchemy.exc import IntegrityError
 
-from car_wash.utils.repository import AbstractRepository
+if TYPE_CHECKING:
+    from car_wash.utils.repository import AbstractRepository
 
 NOT_PRESENT_PATTERN = compile(
     'Key ({field})=({input}) is not present in table'
@@ -68,7 +69,7 @@ def orm_errors_handler(
 ) -> Callable[Param, RetType]:
     @functools.wraps(func)
     async def wrapper(
-        self: AbstractRepository, *args: Param.args, **kwargs: Param.kwargs
+        self: 'AbstractRepository', *args: Param.args, **kwargs: Param.kwargs
     ) -> RetType:
         try:
             result = await func(self, *args, **kwargs)

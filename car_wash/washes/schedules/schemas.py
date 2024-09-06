@@ -4,7 +4,7 @@ from typing import Literal, Self
 from pydantic import BaseModel, Field, model_validator
 
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
-from car_wash.washes.schedules.exceptions import StartTimeGreaterError
+from car_wash.washes.exceptions import StartTimeGreaterError
 
 
 class ScheduleCreate(BaseModel):

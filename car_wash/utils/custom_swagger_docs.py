@@ -32,7 +32,7 @@ def custom_swagger_ui_html(
     openapi_url: str,
     title: str,
     swagger_favicon_url: str = 'https://fastapi.tiangolo.com/img/favicon.png',
-):
+) -> HTMLResponse:
     current_swagger_ui_parameters = swagger_ui_default_parameters.copy()
 
     prms = ''
@@ -94,10 +94,13 @@ def custom_swagger_ui_html(
     )
 
 
-def create_custom_swagger_docs(app: FastAPI):
+def create_custom_swagger_docs(app: FastAPI) -> None:
     @app.get('/docs', include_in_schema=False)
-    async def custom_swagger_ui():
-        return custom_swagger_ui_html(
-            openapi_url=app.openapi_url,  # noqa
-            title=app.title,  # noqa
-        )
+    async def custom_swagger_ui() -> HTMLResponse | None:
+        # Pycharm linter cant find openapi_url and title
+        if hasattr(app, 'openapi_url') and hasattr(app, 'title'):
+            return custom_swagger_ui_html(
+                openapi_url=app.openapi_url,
+                title=app.title,
+            )
+        return None
