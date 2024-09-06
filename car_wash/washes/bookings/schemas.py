@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
 
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
+from car_wash.washes.exceptions import StartDatetimeGreaterError
 
 
 class BookingCreate(BaseModel):
@@ -15,11 +16,9 @@ class BookingCreate(BaseModel):
     is_exception: bool = Field(default=False)
 
     @model_validator(mode='after')
-    def check_start_end_datetime(self):
+    def check_start_end_datetime(self) -> Self:
         if self.end_datetime < self.start_datetime:
-            raise ValueError(
-                'start_datetime have to be lower then end_datetime'
-            )
+            raise StartDatetimeGreaterError
         return self
 
 

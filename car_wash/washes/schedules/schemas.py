@@ -1,9 +1,10 @@
 from datetime import datetime, time
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
 
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
+from car_wash.washes.schedules.exceptions import StartTimeGreaterError
 
 
 class ScheduleCreate(BaseModel):
@@ -16,9 +17,9 @@ class ScheduleCreate(BaseModel):
     is_available: bool
 
     @model_validator(mode='after')
-    def check_start_end_time(self):
+    def check_start_end_time(self) -> Self:
         if self.end_time < self.start_time:
-            raise ValueError('start_time have to be lower then end_time')
+            raise StartTimeGreaterError
         return self
 
 
