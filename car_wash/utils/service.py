@@ -1,7 +1,7 @@
-import pydantic
 from fastapi import HTTPException
+from pydantic import BaseModel
 
-from car_wash.utils.repository import AbstractRepository
+from car_wash.utils.repository import AbstractRepository, AnyModel
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
@@ -11,18 +11,20 @@ class GenericCRUDService:
     def __init__(self):
         self.crud_repo: AbstractRepository = self.repository()
 
-    async def create_entity(self, new_entity: pydantic.BaseModel):
+    async def create_entity(self, new_entity: BaseModel) -> int:
         entity_dict = new_entity.model_dump()
         entity_id = await self.crud_repo.add_one(entity_dict)
         return entity_id
 
-    async def read_entity(self, id: int):
+    async def read_entity(self, id: int) -> AnyModel:
         entity = await self.crud_repo.find_one(id)
         if entity is None:
             raise HTTPException(status_code=404)
         return entity
 
-    async def paginate_entities(self, query: GenericListRequest):
+    async def paginate_entities(
+        self, query: GenericListRequest
+    ) -> GenericListResponse:
         query = query.model_dump()
         page, limit, order_by = (
             query.pop('page'),
@@ -38,7 +40,7 @@ class GenericCRUDService:
         pages = (total_records + limit - 1) // limit
         return GenericListResponse(data=entities, total=pages, current=page)
 
-    async def update_entity(self, id: int, new_values: pydantic.BaseModel):
+    async def update_entity(self, id: int, new_values: BaseModel) -> AnyModel:
         new_values_dict = new_values.model_dump(exclude_none=True)
         updated_entity = await self.crud_repo.change_one(id, new_values_dict)
         if updated_entity is None:
