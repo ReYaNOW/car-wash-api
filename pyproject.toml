@@ -37,7 +37,7 @@ include = ["car_wash"]
 parallel = true
 
 [tool.ruff]
-exclude = ["migrations/versions/*.py", "migrations/env.py"]
+exclude = ["migrations/versions/*.py", "migrations/env.py", 'fill_db_with_cars.py']
 line-length = 79
 
 [tool.ruff.lint]
