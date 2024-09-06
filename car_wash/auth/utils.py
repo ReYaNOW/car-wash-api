@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Any, Literal
+from enum import Enum
 
 import jwt
 from jwt import ExpiredSignatureError, InvalidTokenError
@@ -18,8 +18,9 @@ from car_wash.utils.schemas import AnyModel
 ALGORITHM = 'HS256'
 
 
-async def get_token_service():
-    return TokenService()
+class TokenType(Enum):
+    ACCESS = 'access'
+    REFRESH = 'refresh'
 
 
 class TokenService:
@@ -29,32 +30,28 @@ class TokenService:
     def __init__(self):
         self.refresh_token_repo = self.refresh_token_repo()
 
-    def create_tokens(self, sub: Any) -> tuple[str, str]:
-        access_token = self.create_jwt(sub=sub, token_type='access')
-        refresh_token = self.create_jwt(sub=sub, token_type='refresh')
+    def create_tokens(self, sub: str | int) -> tuple[str, str]:
+        access_token = self.create_jwt(sub=sub, token_type=TokenType.ACCESS)
+        refresh_token = self.create_jwt(sub=sub, token_type=TokenType.ACCESS)
         return access_token, refresh_token
 
-    def create_jwt(
-        self, sub: Any, token_type: Literal['access', 'refresh']
-    ) -> str:
+    def create_jwt(self, sub: str | int, token_type: TokenType) -> str:
         delta = (
             timedelta(days=config.refresh_token_expire_days)
-            if token_type == 'refresh'
+            if token_type.value == TokenType.REFRESH
             else timedelta(minutes=config.access_token_expire_minutes)
         )
         expire = datetime.now(timezone.utc) + delta
-        payload = {'sub': sub, 'exp': expire, 'type': token_type}
+        payload = {'sub': sub, 'exp': expire, 'type': token_type.value}
         encoded_jwt = jwt.encode(payload, self.secret_key, algorithm=ALGORITHM)
         return encoded_jwt
 
-    def process_token(
-        self, token: str, token_type: Literal['access', 'refresh']
-    ) -> int:
+    def process_token(self, token: str, token_type: TokenType) -> int:
         try:
             payload = jwt.decode(
                 token, self.secret_key, algorithms=[ALGORITHM]
             )
-            if payload.get('type') != token_type:
+            if payload.get('type') != token_type.value:
                 raise invalid_token_type_exc
             user_id: str = payload.get('sub')
             return int(user_id)
@@ -63,7 +60,9 @@ class TokenService:
         except InvalidTokenError:
             raise credentials_exc from None
 
-    async def create_refresh_token_in_db(self, token: str, user_id: int):
+    async def create_refresh_token_in_db(
+        self, token: str, user_id: int
+    ) -> int:
         return await self.refresh_token_repo.create_token_or_update(
             {'token': token, 'user_id': user_id}
         )
@@ -72,6 +71,10 @@ class TokenService:
         return await self.refresh_token_repo.find_one_by_custom_field(
             'user_id', user_id
         )
+
+
+async def get_token_service() -> TokenService:
+    return TokenService()
 
 
 pwd_context = CryptContext(

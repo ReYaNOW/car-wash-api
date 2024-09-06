@@ -29,3 +29,13 @@ invalid_token_type_exc = HTTPException(
 refresh_token_is_used_exc = HTTPException(
     **default_fields, detail='Refresh token already used'
 )
+
+
+class MissingCredentialsError(ValueError):
+    def __init__(self):
+        super().__init__('id or both username and password is required')
+
+
+class PasswordIsNotHashedError(ValueError):
+    def __init__(self):
+        super().__init__('Password must be hashed')

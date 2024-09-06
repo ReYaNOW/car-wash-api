@@ -1,12 +1,8 @@
 from car_wash.auth.exceptions import refresh_token_is_used_exc
 from car_wash.auth.schemas import Tokens, UserCredentials
-from car_wash.auth.utils import PasswordService, TokenService
+from car_wash.auth.utils import PasswordService, TokenService, TokenType
 from car_wash.users.schemas import UserRegistration
 from car_wash.users.service import UserService
-
-
-async def get_auth_service():
-    return AuthService()
 
 
 class AuthService:
@@ -42,8 +38,10 @@ class AuthService:
         )
         return Tokens(access_token=access_token, refresh_token=refresh_token)
 
-    async def refresh_tokens(self, token: str):
-        user_id = self.token_service.process_token(token, token_type='refresh')
+    async def refresh_tokens(self, token: str) -> Tokens:
+        user_id = self.token_service.process_token(
+            token, token_type=TokenType.REFRESH
+        )
         token_in_db = await self.token_service.read_token_by_user_id(
             user_id=user_id
         )
@@ -58,3 +56,7 @@ class AuthService:
             sub=user.id
         )
         return Tokens(access_token=access_token, refresh_token=refresh_token)
+
+
+async def get_auth_service() -> AuthService:
+    return AuthService()

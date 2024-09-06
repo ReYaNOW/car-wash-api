@@ -1,6 +1,12 @@
+from typing import Self
+
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from car_wash.auth.exceptions import (
+    MissingCredentialsError,
+    PasswordIsNotHashedError,
+)
 from car_wash.auth.utils import pwd_context
 from car_wash.users.schemas import UserRead, UserRegistration
 
@@ -26,9 +32,9 @@ class UserCredentials(BaseModel):
     id: int | None = None
 
     @model_validator(mode='after')
-    def validate(self):
+    def validate(self) -> Self:
         if not self.id and not (self.username and self.password):
-            raise ValueError('id or both username and password is required')
+            raise MissingCredentialsError
         return self
 
 
@@ -38,9 +44,10 @@ class UserForDB(UserRegistration):
     role_id: int
 
     @field_validator('hashed_password')
-    def check_password_hashed(cls, v):
+    @classmethod
+    def check_hashed_password(cls, v: str) -> str:
         if not pwd_context.identify(v):
-            raise ValueError('Password must be hashed')
+            raise PasswordIsNotHashedError
         return v
 
 
