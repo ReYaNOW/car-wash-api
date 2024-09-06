@@ -27,9 +27,11 @@ mypy = "^1.11.1"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-
 [tool.mypy]
 strict = true
+
+[tool.pyright]
+include = ["car_wash"]
 
 [tool.coverage.run]
 parallel = true
@@ -40,7 +42,7 @@ line-length = 79
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'D203', 'D213']
+ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913', 'D203', 'D213']
 # D Missing docstrings
 # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collection
 # RET504 Unnecessary assignment to ... before `return` statement
@@ -48,6 +50,7 @@ ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'D203', 'D213']
 # ISC001 (ruff formatter not working with it)
 # TRY003 Avoid specifying long messages outside the exception class
 # ANN204 Missing return type annotation for special method `__init__`
+# PLR0913 Too many arguments in function definition
 
 # warning: `one-blank-line-before-class` (D203) and `no-blank-line-before-class`
 # (D211) are incompatible. Ignoring `one-blank-line-before-class`.
@@ -57,6 +60,7 @@ ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'D203', 'D213']
 
 [tool.ruff.lint.per-file-ignores]
 "router.py" = ["ANN201"]
+"exception_handling.py" =["PERF401"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
