@@ -71,8 +71,8 @@ class GenerationList(GenericListRequest):
     )
     model_id: int | None = None
 
-    start_year: int | Literal['past'] | None = None
-    end_year: int | Literal['present'] | None = None
+    start_year: str | Literal['past'] | None = None
+    end_year: str | Literal['present'] | None = None
 
     model_config = ConfigDict(protected_namespaces=())
 
