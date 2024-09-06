@@ -42,7 +42,7 @@ line-length = 79
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913', 'D203', 'D213']
+ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913', 'PYI051', 'D203', 'D213']
 # D Missing docstrings
 # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collection
 # RET504 Unnecessary assignment to ... before `return` statement
@@ -51,6 +51,7 @@ ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913', 'D20
 # TRY003 Avoid specifying long messages outside the exception class
 # ANN204 Missing return type annotation for special method `__init__`
 # PLR0913 Too many arguments in function definition
+# PYI051 `Literal['present']` is redundant in a union with `str`
 
 # warning: `one-blank-line-before-class` (D203) and `no-blank-line-before-class`
 # (D211) are incompatible. Ignoring `one-blank-line-before-class`.
