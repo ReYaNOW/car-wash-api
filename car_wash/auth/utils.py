@@ -13,7 +13,7 @@ from car_wash.auth.exceptions import (
 )
 from car_wash.auth.repository import RefreshTokenRepository
 from car_wash.config import config
-from car_wash.utils.schemas import AnyModel
+from car_wash.utils.repository import AnyModel
 
 ALGORITHM = 'HS256'
 

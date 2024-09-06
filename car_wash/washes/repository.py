@@ -4,7 +4,8 @@ from datetime import datetime, time
 from sqlalchemy import select
 
 from car_wash.database import async_session_maker
-from car_wash.utils.repository import SQLAlchemyRepository, error_handler
+from car_wash.utils.exception_handling import orm_errors_handler
+from car_wash.utils.repository import SQLAlchemyRepository
 from car_wash.washes.models import Booking, CarWash, Schedule
 
 
@@ -13,8 +14,10 @@ class CarWashRepository(SQLAlchemyRepository):
     schedule_model = Schedule
     booking_model = Booking
 
-    @error_handler
-    async def find_available_times(self, car_wash_id: int, date: date_type):
+    @orm_errors_handler
+    async def find_available_times(
+        self, car_wash_id: int, date: date_type
+    ) -> list[tuple[datetime, datetime]]:
         day_of_week = date.weekday()
 
         booking_model = self.booking_model

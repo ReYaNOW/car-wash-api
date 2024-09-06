@@ -1,6 +1,11 @@
+import functools
+from typing import Callable, ParamSpec, TypeVar
+
 from fastapi import HTTPException
-from parse import compile
+from parse import Result, compile
 from sqlalchemy.exc import IntegrityError
+
+from car_wash.utils.repository import AbstractRepository
 
 NOT_PRESENT_PATTERN = compile(
     'Key ({field})=({input}) is not present in table'
@@ -13,7 +18,7 @@ NOT_NULL_PATTERN = compile(
 )
 
 
-def handle_integrity_error(e: IntegrityError, table_name: str):
+def handle_integrity_error(e: IntegrityError, table_name: str) -> None:
     table_slug = table_name.capitalize().replace('_', ' ')
     original_driver_exception = str(e.orig)
 
@@ -44,12 +49,32 @@ def handle_integrity_error(e: IntegrityError, table_name: str):
     raise HTTPException(status_code=500) from e
 
 
-def get_values(result, *args):
+def get_values(result: Result, *args: str) -> list[str]:
     new_values = []
-    for value in args:
-        try:
+    try:
+        for value in args:
             new_values.append(result[value])
-        except KeyError:
-            new_values.append(None)
-
+    except KeyError:
+        new_values.append(None)
     return new_values
+
+
+Param = ParamSpec('Param')
+RetType = TypeVar('RetType')
+
+
+def orm_errors_handler(
+    func: Callable[Param, RetType],
+) -> Callable[Param, RetType]:
+    @functools.wraps(func)
+    async def wrapper(
+        self: AbstractRepository, *args: Param.args, **kwargs: Param.kwargs
+    ) -> RetType:
+        try:
+            result = await func(self, *args, **kwargs)
+        except IntegrityError as e:
+            handle_integrity_error(e, self.model.__tablename__)
+        else:
+            return result
+
+    return wrapper

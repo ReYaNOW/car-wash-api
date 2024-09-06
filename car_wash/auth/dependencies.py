@@ -1,4 +1,4 @@
-from typing import Annotated, Callable, Coroutine
+from typing import Annotated, Any, Callable, Coroutine
 
 from fastapi import Depends
 
@@ -12,7 +12,8 @@ from car_wash.auth.schemas import oauth2_scheme
 from car_wash.auth.utils import TokenService, TokenType, get_token_service
 from car_wash.users.schemas import UserReadWithRole
 from car_wash.users.service import UserService, get_user_service
-from car_wash.utils.schemas import AnyModel, GenericListRequest
+from car_wash.utils.repository import AnyModel
+from car_wash.utils.schemas import GenericListRequest
 from car_wash.utils.service import GenericCRUDService
 
 
@@ -62,7 +63,7 @@ async def get_user_admin(
 
 def get_validate_access_to_entity(
     service: type[GenericCRUDService],
-) -> Callable[[int, UserReadWithRole], Coroutine[AnyModel]]:
+) -> Callable[[int, UserReadWithRole], Coroutine[Any, Any, AnyModel]]:
     async def validate_access_to_entity(
         id: int,
         current_user: Annotated[UserReadWithRole, Depends(get_user_client)],
@@ -78,7 +79,8 @@ def get_validate_access_to_entity(
 def get_validate_query_user_id(
     list_schema: GenericListRequest,
 ) -> Callable[
-    [GenericListRequest, UserReadWithRole], Coroutine[GenericListRequest]
+    [GenericListRequest, UserReadWithRole],
+    Coroutine[Any, Any, GenericListRequest],
 ]:
     async def validate_query_user_id(
         query: Annotated[list_schema, Depends()],
