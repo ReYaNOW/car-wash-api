@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from sqlalchemy import (
     BinaryExpression,
@@ -16,12 +15,7 @@ from sqlalchemy.sql.expression import Select
 
 from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import orm_errors_handler
-
-
-class AnyModel(orm.MappedClassProtocol[Any]):
-    __tablename__ = 'any_model'
-
-    id: orm.Mapped[int]
+from car_wash.utils.schemas import AnyModel
 
 
 class AbstractRepository(ABC):

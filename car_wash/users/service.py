@@ -4,10 +4,11 @@ from car_wash.auth.exceptions import credentials_exc
 from car_wash.auth.schemas import UserCredentials, UserForDB, UserInDB
 from car_wash.auth.utils import PasswordService
 from car_wash.users.exceptions import NoDefaultRoleError
+from car_wash.users.models import User
 from car_wash.users.repository import UserRepository
 from car_wash.users.roles.repository import RoleRepository
 from car_wash.users.schemas import UserRegistration
-from car_wash.utils.repository import AnyModel
+from car_wash.utils.schemas import AnyModel
 from car_wash.utils.service import GenericCRUDService
 
 
@@ -46,7 +47,7 @@ class UserService(GenericCRUDService):
             user = await self.read_user_with_role(user_credentials.id)
             return UserInDB.model_validate(user)
 
-        user = await self.read_user_by_name(user_credentials.username)
+        user: User = await self.read_user_by_name(user_credentials.username)
 
         if not user or not await self.password_service.a_verify_pass(
             user_credentials.password, user.hashed_password

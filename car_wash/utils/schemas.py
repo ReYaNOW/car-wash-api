@@ -1,4 +1,16 @@
+from typing import TypeVar
+
 from pydantic import BaseModel, computed_field
+from sqlalchemy.orm import Mapped
+
+
+class Model:
+    __tablename__ = 'any_model'
+
+    id: Mapped[int]
+
+
+AnyModel = TypeVar('AnyModel', bound=Model)
 
 
 class GenericListRequest(BaseModel):
