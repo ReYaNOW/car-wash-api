@@ -4,19 +4,18 @@ from car_wash.auth.exceptions import credentials_exc
 from car_wash.auth.schemas import UserCredentials, UserForDB, UserInDB
 from car_wash.auth.utils import PasswordService
 from car_wash.users.exceptions import NoDefaultRoleError
-from car_wash.users.models import User
+from car_wash.users.models import Role, User
 from car_wash.users.repository import UserRepository
 from car_wash.users.roles.repository import RoleRepository
 from car_wash.users.schemas import UserRegistration
-from car_wash.utils.schemas import AnyModel
 from car_wash.utils.service import GenericCRUDService
 
 
-class UserService(GenericCRUDService):
+class UserService(GenericCRUDService[User]):
     repository = UserRepository
 
-    user_repo = UserRepository
-    role_repo = RoleRepository
+    user_repo = UserRepository[User]
+    role_repo = RoleRepository[Role]
     password_service = PasswordService
 
     def __init__(self):
@@ -47,7 +46,7 @@ class UserService(GenericCRUDService):
             user = await self.read_user_with_role(user_credentials.id)
             return UserInDB.model_validate(user)
 
-        user: User = await self.read_user_by_name(user_credentials.username)
+        user = await self.read_user_by_name(user_credentials.username)
 
         if not user or not await self.password_service.a_verify_pass(
             user_credentials.password, user.hashed_password
@@ -55,21 +54,21 @@ class UserService(GenericCRUDService):
             raise credentials_exc
         return UserInDB.model_validate(user)
 
-    async def get_user_by_id(self, user_id: int) -> AnyModel:
+    async def get_user_by_id(self, user_id: int) -> User:
         user = await self.user_repo.find_one(user_id)
         if not user:
             raise credentials_exc
         return user
 
-    async def read_user_by_name(self, username: str) -> AnyModel:
+    async def read_user_by_name(self, username: str) -> User:
         return await self.user_repo.find_one_by_custom_field(
             'username', username
         )
 
-    async def read_user_with_role(self, id: int) -> AnyModel:
+    async def read_user_with_role(self, id: int) -> User:
         return await self.user_repo.find_one(id, [self.user_repo.model.role])
 
-    async def find_default_role(self) -> AnyModel:
+    async def find_default_role(self) -> Role:
         default_role = await self.role_repo.find_one_by_custom_field(
             'name', 'client'
         )

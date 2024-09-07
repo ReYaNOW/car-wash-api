@@ -1,22 +1,17 @@
-from typing import TypeVar
-
 from pydantic import BaseModel, computed_field
+from sqlalchemy import TableClause
 from sqlalchemy.orm import Mapped
 
 
-class Model:
+class AnyModel(TableClause):
     __tablename__ = 'any_model'
 
     id: Mapped[int]
 
 
-AnyModel = TypeVar('AnyModel', bound=Model)
-
-
 class GenericListRequest(BaseModel):
     page: int = 1
     limit: int = 10
-    order_by: str
 
 
 class GenericListResponse(BaseModel):

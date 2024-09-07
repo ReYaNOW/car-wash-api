@@ -1,10 +1,11 @@
+from car_wash.cars.models import UserCar
 from car_wash.cars.repository import UserCarRepository
 from car_wash.cars.schemas import UserCarCreate
 from car_wash.users.models import User
 from car_wash.utils.service import GenericCRUDService
 
 
-class UserCarService(GenericCRUDService):
+class UserCarService(GenericCRUDService[UserCar]):
     repository = UserCarRepository
 
     async def create_user_car(self, user: User, new_car: UserCarCreate) -> int:

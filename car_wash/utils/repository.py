@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
 from sqlalchemy import (
     BinaryExpression,
@@ -17,17 +18,15 @@ from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import orm_errors_handler
 from car_wash.utils.schemas import AnyModel
 
+T = TypeVar('T')
 
-class AbstractRepository(ABC):
-    model: type[AnyModel]
 
+class AbstractRepository(ABC, Generic[T]):
     @abstractmethod
     async def add_one(self, data: dict) -> int:
         raise NotImplementedError
 
-    async def find_one(
-        self, id: int, load_children: list | None = None
-    ) -> AnyModel:
+    async def find_one(self, id: int, relationships: list | None = None) -> T:
         raise NotImplementedError
 
     async def find_one_by_custom_field(
@@ -46,11 +45,11 @@ class AbstractRepository(ABC):
         order_by: str,
         filter_by: dict,
         relationships: list | None = None,
-    ) -> list[AnyModel]:
+    ) -> list[T]:
         raise NotImplementedError
 
     @abstractmethod
-    async def change_one(self, id: int, data: dict) -> AnyModel:
+    async def change_one(self, id: int, data: dict) -> T:
         raise NotImplementedError
 
     @abstractmethod
@@ -62,7 +61,9 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
 
-class SQLAlchemyRepository(AbstractRepository):
+class SQLAlchemyRepository(AbstractRepository[T]):
+    model: AnyModel
+
     @orm_errors_handler
     async def add_one(self, data: dict) -> int:
         async with async_session_maker() as session:
@@ -72,9 +73,7 @@ class SQLAlchemyRepository(AbstractRepository):
             return res.scalar_one()
 
     @orm_errors_handler
-    async def find_one(
-        self, id: int, relationships: list | None = None
-    ) -> AnyModel:
+    async def find_one(self, id: int, relationships: list | None = None) -> T:
         async with async_session_maker() as session:
             query = select(self.model).where(self.model.id == id)
             query = self.add_joined_loads(query, relationships)
@@ -88,7 +87,7 @@ class SQLAlchemyRepository(AbstractRepository):
         custom_field: str,
         custom_value: str | int,
         relationships: list | None = None,
-    ) -> AnyModel:
+    ) -> T:
         column: orm.MappedColumn = getattr(self.model, custom_field)
         async with async_session_maker() as session:
             query = select(self.model).where(column == custom_value)
@@ -105,7 +104,7 @@ class SQLAlchemyRepository(AbstractRepository):
         order_by: str,
         filters: dict,
         relationships: list | None = None,
-    ) -> list[AnyModel]:
+    ) -> list[T]:
         offset_value = page * limit - limit
         async with async_session_maker() as session:
             query = (
@@ -136,7 +135,7 @@ class SQLAlchemyRepository(AbstractRepository):
             return res.scalar_one()
 
     @orm_errors_handler
-    async def change_one(self, id: int, data: dict) -> AnyModel:
+    async def change_one(self, id: int, data: dict) -> T:
         async with async_session_maker() as session:
             stmt = (
                 update(self.model)
@@ -151,7 +150,7 @@ class SQLAlchemyRepository(AbstractRepository):
     @orm_errors_handler
     async def change_one_by_custom_field(
         self, custom_field: str, custom_value: str | int, data: dict
-    ) -> AnyModel:
+    ) -> T:
         column: orm.MappedColumn = getattr(self.model, custom_field)
         async with async_session_maker() as session:
             stmt = (

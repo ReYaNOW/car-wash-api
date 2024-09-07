@@ -2,9 +2,10 @@ from car_wash.users.models import User
 from car_wash.utils.service import GenericCRUDService
 from car_wash.washes.bookings.repository import BookingRepository
 from car_wash.washes.bookings.schemas import BookingCreate
+from car_wash.washes.models import Booking
 
 
-class BookingService(GenericCRUDService):
+class BookingService(GenericCRUDService[Booking]):
     repository = BookingRepository
 
     async def create_booking(

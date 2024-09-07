@@ -11,9 +11,9 @@ from car_wash.auth.exceptions import (
     expired_token_exc,
     invalid_token_type_exc,
 )
+from car_wash.auth.models import RefreshToken
 from car_wash.auth.repository import RefreshTokenRepository
 from car_wash.config import config
-from car_wash.utils.repository import AnyModel
 
 ALGORITHM = 'HS256'
 
@@ -67,7 +67,7 @@ class TokenService:
             {'token': token, 'user_id': user_id}
         )
 
-    async def read_token_by_user_id(self, user_id: int) -> AnyModel:
+    async def read_token_by_user_id(self, user_id: int) -> RefreshToken:
         return await self.refresh_token_repo.find_one_by_custom_field(
             'user_id', user_id
         )

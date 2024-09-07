@@ -1,11 +1,13 @@
+from typing import Generic
+
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from car_wash.utils.repository import AbstractRepository, AnyModel
+from car_wash.utils.repository import AbstractRepository, T
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
-class GenericCRUDService:
+class GenericCRUDService(Generic[T]):
     repository: type(AbstractRepository) = None
 
     def __init__(self):
@@ -16,8 +18,8 @@ class GenericCRUDService:
         entity_id = await self.crud_repo.add_one(entity_dict)
         return entity_id
 
-    async def read_entity(self, id: int) -> AnyModel:
-        entity = await self.crud_repo.find_one(id)
+    async def read_entity(self, id: int) -> T:
+        entity: T = await self.crud_repo.find_one(id)
         if entity is None:
             raise HTTPException(status_code=404)
         return entity
@@ -40,7 +42,7 @@ class GenericCRUDService:
         pages = (total_records + limit - 1) // limit
         return GenericListResponse(data=entities, total=pages, current=page)
 
-    async def update_entity(self, id: int, new_values: BaseModel) -> AnyModel:
+    async def update_entity(self, id: int, new_values: BaseModel) -> T:
         new_values_dict = new_values.model_dump(exclude_none=True)
         updated_entity = await self.crud_repo.change_one(id, new_values_dict)
         if updated_entity is None:

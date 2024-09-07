@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from car_wash.utils.service import GenericCRUDService
+from car_wash.washes.models import CarWash
 from car_wash.washes.repository import CarWashRepository
 
 
-class CarWashService(GenericCRUDService):
+class CarWashService(GenericCRUDService[CarWash]):
     repository = CarWashRepository
     crud_repo: CarWashRepository
 

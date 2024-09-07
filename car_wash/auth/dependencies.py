@@ -77,13 +77,13 @@ def get_validate_access_to_entity(
 
 
 def get_validate_query_user_id(
-    list_schema: GenericListRequest,
+    list_schema: type[GenericListRequest],
 ) -> Callable[
     [GenericListRequest, UserReadWithRole],
     Coroutine[Any, Any, GenericListRequest],
 ]:
     async def validate_query_user_id(
-        query: Annotated[GenericListRequest, Depends()],
+        query: Annotated[list_schema, Depends()],
         current_user: Annotated[UserReadWithRole, Depends(get_user_client)],
     ) -> list_schema:
         check_user_id(query, current_user)
