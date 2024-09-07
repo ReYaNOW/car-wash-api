@@ -96,11 +96,10 @@ def custom_swagger_ui_html(
 
 def create_custom_swagger_docs(app: FastAPI) -> None:
     @app.get('/docs', include_in_schema=False)
-    async def custom_swagger_ui() -> HTMLResponse | None:
+    async def custom_swagger_ui() -> HTMLResponse:
         # Pycharm linter cant find openapi_url and title
         if hasattr(app, 'openapi_url') and hasattr(app, 'title'):
             return custom_swagger_ui_html(
                 openapi_url=app.openapi_url,
                 title=app.title,
             )
-        return None
