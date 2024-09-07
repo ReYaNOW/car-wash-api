@@ -1,4 +1,4 @@
-from typing import Callable, ParamSpec
+from typing import Any, Callable
 
 from fastapi import APIRouter, Depends
 
@@ -13,18 +13,13 @@ CLIENT = 'Allowed to client or above'
 OWNER = 'Allowed to owner or admin'
 ADMIN = 'Allowed to admin only'
 
-Param_init = ParamSpec('Param_init', bound=APIRouter.__init__)
-Param_add_api_route = ParamSpec(
-    'Param_add_api_route', bound=APIRouter.add_api_route
-)
-
 
 class CustomRouter(APIRouter):
     def __init__(
         self,
-        *args: Param_init.args,
+        *args: Any,
         default_description: str,
-        **kwargs: Param_init.kwargs,
+        **kwargs: Any,
     ):
         super().__init__(*args, **kwargs)
         self.default_description = default_description
@@ -32,8 +27,8 @@ class CustomRouter(APIRouter):
     def add_api_route(
         self,
         path: str,
-        endpoint: Callable,
-        **kwargs: Param_add_api_route.kwargs,
+        endpoint: Callable[..., Any],
+        **kwargs: Any,
     ) -> None:
         if not kwargs.get('description'):
             kwargs['description'] = self.default_description
