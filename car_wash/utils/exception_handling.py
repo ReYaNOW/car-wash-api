@@ -1,5 +1,5 @@
 import functools
-from typing import TYPE_CHECKING, Callable, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Any, Callable
 
 from fastapi import HTTPException
 from parse import Result, compile
@@ -60,17 +60,13 @@ def get_values(result: Result, *args: str) -> list[str]:
     return new_values
 
 
-Param = ParamSpec('Param')
-RetType = TypeVar('RetType')
-
-
 def orm_errors_handler(
-    func: Callable[Param, RetType],
-) -> Callable[Param, RetType]:
+    func: Callable[..., Any],
+) -> Callable[..., Any]:
     @functools.wraps(func)
     async def wrapper(
-        self: 'AbstractRepository', *args: Param.args, **kwargs: Param.kwargs
-    ) -> RetType:
+        self: 'AbstractRepository', *args: Any, **kwargs: Any
+    ) -> Any:
         try:
             result = await func(self, *args, **kwargs)
         except IntegrityError as e:
