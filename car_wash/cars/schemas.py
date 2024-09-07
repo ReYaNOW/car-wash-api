@@ -1,4 +1,4 @@
-from typing import Literal
+from enum import Enum
 
 from pydantic import BaseModel, Field, computed_field
 
@@ -25,8 +25,15 @@ class UserCarRead(BaseModel):
         from_attributes = True
 
 
+class OrderByEnum(str, Enum):
+    id = 'id'
+    name = 'name'
+    user_id = 'user_id'
+    configuration_id = 'configuration_id'
+
+
 class UserCarList(GenericListRequest):
-    order_by: Literal['id', 'name', 'user_id', 'configuration_id'] = 'id'
+    order_by: OrderByEnum = OrderByEnum.id
     name_like: str | None = Field(
         default=None, description='Search by substring'
     )
