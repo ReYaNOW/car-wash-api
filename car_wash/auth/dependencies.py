@@ -83,7 +83,7 @@ def get_validate_query_user_id(
     Coroutine[Any, Any, GenericListRequest],
 ]:
     async def validate_query_user_id(
-        query: Annotated[list_schema, Depends()],
+        query: Annotated[GenericListRequest, Depends()],
         current_user: Annotated[UserReadWithRole, Depends(get_user_client)],
     ) -> list_schema:
         check_user_id(query, current_user)
