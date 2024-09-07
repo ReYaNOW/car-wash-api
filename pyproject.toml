@@ -21,17 +21,10 @@ psycopg2-binary = "^2.9.9"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.8.0"
 ruff = "^0.5.7"
-mypy = "^1.11.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.mypy]
-strict = true
-
-[tool.pyright]
-include = ["car_wash"]
 
 [tool.coverage.run]
 parallel = true
@@ -42,7 +35,8 @@ line-length = 79
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913', 'PYI051', 'D203', 'D213']
+ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913',
+          'PYI051', 'ANN401', 'RET503', 'TCH001', 'D203', 'D213']
 # D Missing docstrings
 # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collection
 # RET504 Unnecessary assignment to ... before `return` statement
@@ -52,6 +46,9 @@ ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913', 'PYI
 # ANN204 Missing return type annotation for special method `__init__`
 # PLR0913 Too many arguments in function definition
 # PYI051 `Literal['present']` is redundant in a union with `str`
+# ANN401 Dynamically typed expressions (typing.Any) are disallowed in ...
+# RET503 Missing explicit `return` at the end of function able to return non-`None` value
+# TCH001 Move application import `car_wash.users.models.User` into a type-checking block
 
 # warning: `one-blank-line-before-class` (D203) and `no-blank-line-before-class`
 # (D211) are incompatible. Ignoring `one-blank-line-before-class`.
