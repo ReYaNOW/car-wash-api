@@ -6,7 +6,7 @@ from parse import Result, compile
 from sqlalchemy.exc import IntegrityError
 
 if TYPE_CHECKING:
-    from car_wash.utils.repository import AbstractRepository
+    from car_wash.utils.repository import SQLAlchemyRepository
 
 NOT_PRESENT_PATTERN = compile(
     'Key ({field})=({input}) is not present in table'
@@ -65,7 +65,7 @@ def orm_errors_handler(
 ) -> Callable[..., Any]:
     @functools.wraps(func)
     async def wrapper(
-        self: 'AbstractRepository', *args: Any, **kwargs: Any
+        self: 'SQLAlchemyRepository', *args: Any, **kwargs: Any
     ) -> Any:
         try:
             result = await func(self, *args, **kwargs)
