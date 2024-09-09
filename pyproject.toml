@@ -19,8 +19,8 @@ psycopg2-binary = "^2.9.9"
 
 
 [tool.poetry.group.dev.dependencies]
+ruff = "^0.6.4"
 pre-commit = "^3.8.0"
-ruff = "^0.5.7"
 
 [build-system]
 requires = ["poetry-core"]
