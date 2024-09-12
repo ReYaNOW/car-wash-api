@@ -9,7 +9,7 @@ from car_wash.utils.repository import SQLAlchemyRepository
 from car_wash.washes.models import Booking, CarWash, Schedule
 
 
-class CarWashRepository(SQLAlchemyRepository):
+class CarWashRepository(SQLAlchemyRepository[CarWash]):
     model = CarWash
     schedule_model = Schedule
     booking_model = Booking

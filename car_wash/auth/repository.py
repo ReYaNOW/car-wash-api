@@ -5,7 +5,7 @@ from car_wash.database import async_session_maker
 from car_wash.utils.repository import SQLAlchemyRepository
 
 
-class RefreshTokenRepository(SQLAlchemyRepository):
+class RefreshTokenRepository(SQLAlchemyRepository[RefreshToken]):
     model = RefreshToken
 
     async def create_token_or_update(self, data: dict) -> int:
