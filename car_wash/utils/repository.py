@@ -22,6 +22,8 @@ T = TypeVar('T')
 
 
 class AbstractRepository(ABC, Generic[T]):
+    model: type[AnyModel | T]
+
     @abstractmethod
     async def add_one(self, data: dict) -> int:
         raise NotImplementedError
@@ -34,7 +36,7 @@ class AbstractRepository(ABC, Generic[T]):
         custom_field: str,
         custom_value: str | int,
         relationships: list | None = None,
-    ) -> dict:
+    ) -> T:
         raise NotImplementedError
 
     @abstractmethod
@@ -62,8 +64,6 @@ class AbstractRepository(ABC, Generic[T]):
 
 
 class SQLAlchemyRepository(AbstractRepository[T]):
-    model: AnyModel
-
     @orm_errors_handler
     async def add_one(self, data: dict) -> int:
         async with async_session_maker() as session:
