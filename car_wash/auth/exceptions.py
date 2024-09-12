@@ -1,12 +1,12 @@
 from fastapi import HTTPException, status
 
-inactive_user_exc = HTTPException(status_code=400, detail='Inactive user')
+InactiveUserExc = HTTPException(status_code=400, detail='Inactive user')
 
-insufficient_permissions_exc = HTTPException(
+InsufficientPermissionsExc = HTTPException(
     status_code=403, detail='Insufficient permissions'
 )
 
-user_id_is_not_set_exc = HTTPException(
+UserIdIsNotSetExc = HTTPException(
     status_code=400, detail='user_id have to be equal to authenticated user'
 )
 
@@ -16,17 +16,17 @@ default_fields = {
     'headers': {'WWW-Authenticate': 'Bearer'},
 }
 
-expired_token_exc = HTTPException(**default_fields, detail='Token has expired')
+ExpiredTokenExc = HTTPException(**default_fields, detail='Token has expired')
 
-credentials_exc = HTTPException(
+CredentialsExc = HTTPException(
     **default_fields, detail='Could not validate credentials'
 )
 
-invalid_token_type_exc = HTTPException(
+InvalidTokenTypeExc = HTTPException(
     **default_fields, detail='Invalid token type'
 )
 
-refresh_token_is_used_exc = HTTPException(
+RefreshTokenIsUsedExc = HTTPException(
     **default_fields, detail='Refresh token already used'
 )
 

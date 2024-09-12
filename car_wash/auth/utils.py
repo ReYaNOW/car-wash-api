@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Annotated
 
 import jwt
+from fastapi import Depends
 from jwt import ExpiredSignatureError, InvalidTokenError
 from passlib.context import CryptContext
 from starlette.concurrency import run_in_threadpool
 
 from car_wash.auth.exceptions import (
-    credentials_exc,
-    expired_token_exc,
-    invalid_token_type_exc,
+    CredentialsExc,
+    ExpiredTokenExc,
+    InvalidTokenTypeExc,
 )
 from car_wash.auth.models import RefreshToken
 from car_wash.auth.repository import RefreshTokenRepository
@@ -52,13 +54,13 @@ class TokenService:
                 token, self.secret_key, algorithms=[ALGORITHM]
             )
             if payload.get('type') != token_type.value:
-                raise invalid_token_type_exc
+                raise InvalidTokenTypeExc
             user_id: str = payload.get('sub')
             return int(user_id)
         except ExpiredSignatureError:
-            raise expired_token_exc from None
+            raise ExpiredTokenExc from None
         except InvalidTokenError:
-            raise credentials_exc from None
+            raise CredentialsExc from None
 
     async def create_refresh_token_in_db(
         self, token: str, user_id: int
@@ -73,8 +75,7 @@ class TokenService:
         )
 
 
-async def get_token_service() -> TokenService:
-    return TokenService()
+AnnTokenService = Annotated[TokenService, Depends(TokenService)]
 
 
 pwd_context = CryptContext(
@@ -103,3 +104,6 @@ class PasswordService:
 
     async def a_get_pass_hash(self, password: str) -> str:
         return await run_in_threadpool(self.get_pass_hash, password)
+
+
+AnnPassService = Annotated[PasswordService, Depends(PasswordService)]

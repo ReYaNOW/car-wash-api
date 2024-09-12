@@ -1,6 +1,8 @@
-from typing import Literal
+from typing import Annotated, Literal
 
-from car_wash.auth.exceptions import credentials_exc
+from fastapi import Depends
+
+from car_wash.auth.exceptions import CredentialsExc
 from car_wash.auth.schemas import UserCredentials, UserForDB, UserInDB
 from car_wash.auth.utils import PasswordService
 from car_wash.users.exceptions import NoDefaultRoleError
@@ -14,8 +16,8 @@ from car_wash.utils.service import GenericCRUDService
 class UserService(GenericCRUDService[User]):
     repository = UserRepository
 
-    user_repo = UserRepository[User]
-    role_repo = RoleRepository[Role]
+    user_repo = UserRepository
+    role_repo = RoleRepository
     password_service = PasswordService
 
     def __init__(self):
@@ -51,13 +53,13 @@ class UserService(GenericCRUDService[User]):
         if not user or not await self.password_service.a_verify_pass(
             user_credentials.password, user.hashed_password
         ):
-            raise credentials_exc
+            raise CredentialsExc
         return UserInDB.model_validate(user)
 
     async def get_user_by_id(self, user_id: int) -> User:
         user = await self.user_repo.find_one(user_id)
         if not user:
-            raise credentials_exc
+            raise CredentialsExc
         return user
 
     async def read_user_by_name(self, username: str) -> User:
@@ -78,5 +80,4 @@ class UserService(GenericCRUDService[User]):
         return default_role
 
 
-async def get_user_service() -> UserService:
-    return UserService()
+AnnUserService = Annotated[UserService, Depends(UserService)]

@@ -1,8 +1,18 @@
-from car_wash.auth.exceptions import refresh_token_is_used_exc
+from typing import Annotated
+
+from fastapi import Depends
+
+from car_wash.auth.exceptions import RefreshTokenIsUsedExc
 from car_wash.auth.schemas import Tokens, UserCredentials
-from car_wash.auth.utils import PasswordService, TokenService, TokenType
+from car_wash.auth.utils import (
+    AnnPassService,
+    AnnTokenService,
+    PasswordService,
+    TokenService,
+    TokenType,
+)
 from car_wash.users.schemas import UserRegistration
-from car_wash.users.service import UserService
+from car_wash.users.service import AnnUserService, UserService
 
 
 class AuthService:
@@ -10,10 +20,15 @@ class AuthService:
     token_service = TokenService
     password_service = PasswordService
 
-    def __init__(self):
-        self.user_service = self.user_service()
-        self.token_service = self.token_service()
-        self.password_service = self.password_service()
+    def __init__(
+        self,
+        user_service: AnnUserService,
+        token_service: AnnTokenService,
+        pass_service: AnnPassService,
+    ):
+        self.user_service = user_service
+        self.token_service = token_service
+        self.password_service = pass_service
 
     async def register(self, new_user: UserRegistration) -> Tokens:
         user_id = await self.user_service.create_user(new_user)
@@ -47,7 +62,7 @@ class AuthService:
         )
 
         if token_in_db.token != token:
-            raise refresh_token_is_used_exc
+            raise RefreshTokenIsUsedExc
 
         user = await self.user_service.authenticate_user(
             UserCredentials(id=user_id), auth_by='id'
@@ -58,5 +73,4 @@ class AuthService:
         return Tokens(access_token=access_token, refresh_token=refresh_token)
 
 
-async def get_auth_service() -> AuthService:
-    return AuthService()
+AnnAuthService = Annotated[AuthService, Depends(AuthService)]

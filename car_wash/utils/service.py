@@ -8,7 +8,7 @@ from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class GenericCRUDService(Generic[T]):
-    repository: type(AbstractRepository) = None
+    repository: type[AbstractRepository]
 
     def __init__(self):
         self.crud_repo: AbstractRepository = self.repository()
