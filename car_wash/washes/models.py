@@ -15,14 +15,13 @@ class CarWash(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
-    boxes: Mapped[int]
     location_id: Mapped[int] = mapped_column(
         ForeignKey(CarWashLocation.id, ondelete='RESTRICT')
     )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     schedules: Mapped['Schedule'] = relationship(back_populates='car_wash')
-    bookings: Mapped['Booking'] = relationship(back_populates='car_wash')
+    boxes: Mapped['Box'] = relationship(back_populates='car_wash')
 
 
 class Schedule(Base):
@@ -41,6 +40,25 @@ class Schedule(Base):
     car_wash: Mapped['CarWash'] = relationship(back_populates='schedules')
 
 
+class Box(Base):
+    __tablename__ = 'car_wash__box'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    car_wash_id: Mapped[int] = mapped_column(
+        ForeignKey(CarWash.id, ondelete='RESTRICT')
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(User.id, ondelete='RESTRICT')
+    )
+
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    car_wash: Mapped['CarWash'] = relationship(back_populates='boxes')
+    washer: Mapped['User'] = relationship('User')
+    bookings: Mapped['Booking'] = relationship('Booking', back_populates='box')
+
+
 class Booking(Base):
     __tablename__ = 'car_wash__booking'
 
@@ -48,13 +66,15 @@ class Booking(Base):
     user_id: Mapped[int] = mapped_column(
         ForeignKey(User.id, ondelete='RESTRICT')
     )
-    car_wash_id: Mapped[int] = mapped_column(
-        ForeignKey(CarWash.id, ondelete='RESTRICT')
+    box_id: Mapped[int] = mapped_column(
+        ForeignKey(Box.id, ondelete='RESTRICT')
     )
+
     start_datetime: Mapped[datetime]
     end_datetime: Mapped[datetime]
+
     is_exception: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     user: Mapped['User'] = relationship(back_populates='bookings')
-    car_wash: Mapped['CarWash'] = relationship(back_populates='bookings')
+    box: Mapped['Box'] = relationship(back_populates='bookings')
