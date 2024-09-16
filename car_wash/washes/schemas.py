@@ -8,14 +8,12 @@ from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 class CarWashCreate(BaseModel):
     name: str = Field(examples=['Spa Detailing'])
-    boxes: int = Field(examples=[2])
     location_id: int = Field(examples=[1])
 
 
 class CarWashRead(BaseModel):
     id: int
     name: str
-    boxes: int
     location_id: int
     created_at: datetime
 
@@ -24,14 +22,11 @@ class CarWashRead(BaseModel):
 
 
 class CarWashList(GenericListRequest):
-    order_by: Literal['id', 'name', 'boxes', 'location_id', 'created_at'] = (
-        'id'
-    )
+    order_by: Literal['id', 'name', 'location_id'] = 'id'
 
 
 class CarWashUpdate(CarWashCreate):
     name: str = Field(default=None, examples=['Spa Detailing'])
-    boxes: int = Field(default=None, examples=[2])
     location_id: int = Field(default=None, examples=[1])
 
 
@@ -56,4 +51,4 @@ class DeleteResponse(BaseModel):
 
 
 class AvailableTimesResponse(BaseModel):
-    available_times: list[tuple[datetime, datetime]]
+    available_times: dict[int, list[tuple[datetime, datetime]]]

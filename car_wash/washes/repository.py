@@ -1,12 +1,22 @@
-from datetime import date as date_type
+from datetime import date as dt
 from datetime import datetime, time
+from typing import Protocol
 
-from sqlalchemy import select
+from sqlalchemy import and_, func, or_, select
 
 from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import orm_errors_handler
 from car_wash.utils.repository import SQLAlchemyRepository
-from car_wash.washes.models import Booking, CarWash, Schedule
+from car_wash.washes.models import Booking, Box, CarWash, Schedule
+
+
+class RowProtocol(Protocol):
+    box_id: int
+    start_time: time
+    end_time: time
+    start_datetime: datetime | None
+    end_datetime: datetime | None
+    previous_booking_end: datetime | None
 
 
 class CarWashRepository(SQLAlchemyRepository[CarWash]):
@@ -15,60 +25,52 @@ class CarWashRepository(SQLAlchemyRepository[CarWash]):
     booking_model = Booking
 
     @orm_errors_handler
-    async def find_available_times(
-        self, car_wash_id: int, date: date_type
-    ) -> list[tuple[datetime, datetime]]:
+    async def fetch_schedule_and_booking(
+        self, car_wash_id: int, date: dt
+    ) -> list[RowProtocol]:
         day_of_week = date.weekday()
-
-        booking_model = self.booking_model
-        schedule_model = self.schedule_model
-
+        start_of_day = datetime.combine(date, time.min)
+        end_of_day = datetime.combine(date, time.max)
         async with async_session_maker() as session:
-            schedule_query = select(schedule_model).where(
-                schedule_model.car_wash_id == car_wash_id,
-                schedule_model.day_of_week == day_of_week,
-                schedule_model.is_available.is_(True),
-            )
-            schedule_result = await session.execute(schedule_query)
-            schedule = schedule_result.scalar()
-
-            if not schedule:
-                return []
-
-            day_start = datetime.combine(date, time.min)
-            day_end = datetime.combine(date, time.max)
-
-            bookings_query = (
-                select(booking_model)
-                .where(
-                    booking_model.car_wash_id == car_wash_id,
-                    booking_model.start_datetime >= day_start,
-                    booking_model.end_datetime <= day_end,
-                    booking_model.is_exception.is_(False),
+            query = (
+                select(
+                    Box.id.label('box_id'),
+                    Schedule.start_time,
+                    Schedule.end_time,
+                    Booking.start_datetime,
+                    Booking.end_datetime,
                 )
-                .order_by(booking_model.start_datetime)
+                .select_from(Box)
+                .join(Schedule, Schedule.car_wash_id == Box.car_wash_id)
+                .outerjoin(
+                    Booking,
+                    and_(
+                        Booking.box_id == Box.id,
+                        or_(
+                            Booking.start_datetime.between(
+                                start_of_day, end_of_day
+                            ),
+                            Booking.end_datetime.between(
+                                start_of_day, end_of_day
+                            ),
+                            and_(
+                                Booking.start_datetime <= start_of_day,
+                                Booking.end_datetime >= end_of_day,
+                            ),
+                        ),
+                    ),
+                )
+                .where(
+                    Schedule.car_wash_id == car_wash_id,
+                    Schedule.day_of_week == day_of_week,
+                    Schedule.is_available.is_(True),
+                    or_(
+                        Booking.id.is_(None),
+                        func.coalesce(Booking.is_exception, False).is_(False),
+                    ),
+                )
+                .order_by(Box.id, Booking.start_datetime)
             )
-            bookings_result = await session.execute(bookings_query)
-            bookings: list[booking_model] = bookings_result.scalars().all()
 
-        available_start = datetime.combine(date, schedule.start_time)
-        available_end = datetime.combine(date, schedule.end_time)
-
-        available_slots = []
-
-        if not bookings:
-            available_slots.append((available_start, available_end))
-            return available_slots
-
-        current_start = available_start
-
-        for booking in bookings:
-            if booking.start_datetime > current_start:
-                available_slots.append((current_start, booking.start_datetime))
-
-            current_start = booking.end_datetime
-
-        if current_start < available_end:
-            available_slots.append((current_start, available_end))
-
-        return available_slots
+            result = await session.execute(query)
+            return result.fetchall()

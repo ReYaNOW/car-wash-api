@@ -8,7 +8,7 @@ from car_wash.washes.exceptions import StartDatetimeGreaterError
 
 
 class BookingCreate(BaseModel):
-    car_wash_id: int = Field(examples=[1])
+    box_id: int = Field(examples=[1])
 
     start_datetime: datetime
     end_datetime: datetime
@@ -25,7 +25,7 @@ class BookingCreate(BaseModel):
 class BookingRead(BaseModel):
     id: int
     user_id: int
-    car_wash_id: int
+    box_id: int
 
     start_datetime: datetime
     end_datetime: datetime
@@ -44,7 +44,7 @@ class BookingList(GenericListRequest):
 
 
 class BookingUpdate(BookingCreate):
-    car_wash_id: int = Field(default=None, examples=[1])
+    box_id: int = Field(default=None, examples=[1])
 
     start_datetime: datetime = Field(default=None)
     end_datetime: datetime = Field(default=None)
