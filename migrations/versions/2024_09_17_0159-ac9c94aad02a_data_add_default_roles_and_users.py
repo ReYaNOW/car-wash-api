@@ -18,7 +18,7 @@ from car_wash.users.models import Role, User
 
 # revision identifiers, used by Alembic.
 revision: str = 'ac9c94aad02a'
-down_revision: Union[str, None] = '5e76a7f6e1c9'
+down_revision: Union[str, None] = 'b0ad912ee617'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
