@@ -30,7 +30,7 @@ build-backend = "poetry.core.masonry.api"
 parallel = true
 
 [tool.ruff]
-exclude = ["migrations/versions/*.py", "migrations/env.py", 'fill_db_with_cars.py']
+exclude = ["migrations/versions/*.py", "migrations/env.py", 'fill_db.py']
 line-length = 79
 
 [tool.ruff.lint]

@@ -1,8 +1,9 @@
 import json
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import sessionmaker
 
+from car_wash.auth.utils import PasswordService
 from car_wash.cars.models import (
     CarBodyType,
     CarBrand,
@@ -11,6 +12,8 @@ from car_wash.cars.models import (
     CarModel,
 )
 from car_wash.config import config
+from car_wash.database import async_session_maker
+from car_wash.users.models import Role, User
 
 DATABASE_URL = config.database_url.unicode_string()
 engine = create_engine(DATABASE_URL)
@@ -135,3 +138,72 @@ def fill_db():
                         # )
     config.filling_db = False
     print('Данные успешно обработаны.')
+
+
+token_service = PasswordService()
+get_pass_hash = token_service.get_pass_hash
+
+
+async def add_default_users_and_roles():
+    async with async_session_maker() as session:
+        admin_role = await session.execute(
+            select(Role).filter_by(name='admin')
+        )
+        client_role = await session.execute(
+            select(Role).filter_by(name='client')
+        )
+
+        if not admin_role.scalars().first():
+            admin_role = Role(name='admin')
+            session.add(admin_role)
+
+        if not client_role.scalars().first():
+            client_role = Role(name='client')
+            session.add(client_role)
+
+        await session.commit()
+
+        admin_user = await session.execute(
+            select(User).filter_by(username=config.admin_username)
+        )
+        client_user = await session.execute(
+            select(User).filter_by(username='client')
+        )
+
+        if not admin_user.scalars().first():
+            admin_role_result = await session.execute(
+                select(Role).filter_by(name='admin')
+            )
+            admin_role = admin_role_result.scalars().first()
+
+            hashed_pass = get_pass_hash(config.admin_password)
+            admin_user = User(
+                username=config.admin_username,
+                hashed_password=hashed_pass,
+                first_name='Admin',
+                last_name='User',
+                confirmed=True,
+                active=True,
+                role_id=admin_role.id,
+            )
+            session.add(admin_user)
+
+        if not client_user.scalars().first():
+            client_role_result = await session.execute(
+                select(Role).filter_by(name='client')
+            )
+            client_role = client_role_result.scalars().first()
+
+            hashed_pass = get_pass_hash('user_pass')
+            client_user = User(
+                username='client',
+                hashed_password=hashed_pass,
+                first_name='Client',
+                last_name='User',
+                confirmed=True,
+                active=True,
+                role_id=client_role.id,
+            )
+            session.add(client_user)
+
+        await session.commit()
