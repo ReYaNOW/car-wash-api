@@ -15,6 +15,10 @@ class CarWash(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
+
+    image_path: Mapped[str] = mapped_column(nullable=True)
+    image_link: Mapped[str] = mapped_column(nullable=True)
+
     location_id: Mapped[int] = mapped_column(
         ForeignKey(CarWashLocation.id, ondelete='RESTRICT')
     )
