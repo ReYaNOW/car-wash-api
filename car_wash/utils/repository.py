@@ -11,7 +11,7 @@ from sqlalchemy import (
     select,
     update,
 )
-from sqlalchemy.orm import InstrumentedAttribute
+from sqlalchemy.orm import QueryableAttribute
 from sqlalchemy.sql.expression import Select
 
 from car_wash.database import async_session_maker
@@ -55,7 +55,7 @@ class AbstractRepository(ABC, Generic[T]):
         raise NotImplementedError
 
     @abstractmethod
-    async def delete_one(self, id: int) -> int:
+    async def delete_one(self, id: int) -> T:
         raise NotImplementedError
 
     @abstractmethod
@@ -164,19 +164,19 @@ class SQLAlchemyRepository(AbstractRepository[T]):
             return res.scalar()
 
     @orm_errors_handler
-    async def delete_one(self, id: int) -> int:
+    async def delete_one(self, id: int) -> T:
         async with async_session_maker() as session:
             stmt = (
                 delete(self.model)
                 .where(self.model.id == id)
-                .returning(self.model.id)
+                .returning(self.model)
             )
             res = await session.execute(stmt)
             await session.commit()
-            return res
+            return res.scalar()
 
     def add_joined_loads(
-        self, query: Select, relationships: list[InstrumentedAttribute]
+        self, query: Select, relationships: list[QueryableAttribute]
     ) -> Select:
         if not relationships:
             return query
