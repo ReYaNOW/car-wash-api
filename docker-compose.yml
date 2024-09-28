@@ -13,5 +13,20 @@ services:
     ports:
       - 5434:5432
 
+  minio:
+    image: minio/minio
+    container_name: minio_server
+    restart: always
+    volumes:
+      - minio_volume:/data
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_ACCESS_KEY}
+    command: server --address ":9000" --console-address ":9001" /data
+    ports:
+      - 9000:9000
+      - 9001:9001
+
 volumes:
   postgres_volume:
+  minio_volume:
