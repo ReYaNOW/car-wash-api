@@ -9,7 +9,7 @@ from car_wash.auth.dependencies import (
 )
 from car_wash.utils.service import GenericCRUDService
 
-CLIENT = 'Allowed to client or above'
+CLIENT = 'Allowed to client or admin'
 OWNER = 'Allowed to owner or admin'
 ADMIN = 'Allowed to admin only'
 

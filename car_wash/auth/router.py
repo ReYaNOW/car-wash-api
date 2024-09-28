@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from car_wash.auth.schemas import Tokens, oauth2_scheme
 from car_wash.auth.service import AnnAuthService
+from car_wash.storage.schemas import AnnValidateImage
 from car_wash.users.schemas import UserRegistration
 
 router = APIRouter(prefix='/jwt', tags=['JWT'])
@@ -12,9 +13,11 @@ router = APIRouter(prefix='/jwt', tags=['JWT'])
 
 @router.post('/register')
 async def register(
-    new_user: UserRegistration, service: AnnAuthService
+    new_user: UserRegistration,
+    service: AnnAuthService,
+    img: AnnValidateImage,
 ) -> Tokens:
-    tokens = await service.register(new_user)
+    tokens = await service.register(new_user, img)
     return tokens
 
 

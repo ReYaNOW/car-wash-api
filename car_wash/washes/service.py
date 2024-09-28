@@ -1,9 +1,23 @@
+import asyncio
 from collections import defaultdict
 from datetime import datetime, timedelta
 
+from fastapi import BackgroundTasks, UploadFile
+from pydantic import HttpUrl
+
+from car_wash.storage.schemas import S3Folders
+from car_wash.storage.service import S3Service
+from car_wash.storage.utils import validate_link
+from car_wash.utils.schemas import GenericListResponse
 from car_wash.utils.service import GenericCRUDService
 from car_wash.washes.models import CarWash
 from car_wash.washes.repository import CarWashRepository, RowProtocol
+from car_wash.washes.schemas import (
+    CarWashCreate,
+    CarWashList,
+    CarWashRead,
+    CarWashUpdate,
+)
 
 
 class CarWashService(GenericCRUDService[CarWash]):
@@ -12,6 +26,7 @@ class CarWashService(GenericCRUDService[CarWash]):
 
     def __init__(self):
         super().__init__()
+        self.s3_service = S3Service()
         self.available_slots_by_box = None
         self.schedule_end_by_box = None
         self.last_end_time_by_box = None
@@ -28,18 +43,18 @@ class CarWashService(GenericCRUDService[CarWash]):
         if not rows:
             return {}
 
-        self._initialize_available_slots(date, rows)
-        self._process_bookings()
-
-        return dict(self.available_slots_by_box)
-
-    def _initialize_available_slots(
-        self, date: datetime.date, rows: list[RowProtocol]
-    ) -> None:
         self.available_slots_by_box: dict[
             int, list[tuple[datetime, datetime]]
         ] = defaultdict(list)
 
+        self._initialize_available_slots(date, rows)
+        self._process_bookings()
+
+        return self.available_slots_by_box
+
+    def _initialize_available_slots(
+        self, date: datetime.date, rows: list[RowProtocol]
+    ) -> None:
         # Track the last end time for each box to calculate the next
         # available slot
         self.last_end_time_by_box = {}
@@ -117,3 +132,92 @@ class CarWashService(GenericCRUDService[CarWash]):
                     self.available_slots_by_box[box_id].append(
                         (new_start, new_end)
                     )
+
+    async def create_car_wash(
+        self,
+        new_car_wash: CarWashCreate,
+        image: UploadFile | None,
+    ) -> int:
+        if image:
+            unique_filename = await self.s3_service.upload_file(
+                S3Folders.CAR_WASHES, image
+            )
+            new_car_wash.image_path = unique_filename
+
+        car_wash_id = await self.crud_repo.add_one(new_car_wash.model_dump())
+        return car_wash_id
+
+    async def read_car_wash(
+        self,
+        id_: int,
+        bg_tasks: BackgroundTasks,
+    ) -> CarWashRead:
+        user = await self.crud_repo.find_one(id_)
+        return await self.add_img_link_to_car_wash(user, bg_tasks)
+
+    async def paginate_car_washes(
+        self, query: CarWashList, bg_tasks: BackgroundTasks
+    ) -> GenericListResponse:
+        list_response = await self.paginate_entities(query)
+
+        tasks = [
+            self.add_img_link_to_car_wash(car_wash, bg_tasks)
+            for car_wash in list_response.data
+        ]
+
+        res = await asyncio.gather(*tasks)
+        list_response.data = res
+
+        return list_response
+
+    async def add_img_link_to_car_wash(
+        self,
+        car_wash: CarWash | CarWashRead,
+        bg_tasks: BackgroundTasks,
+    ) -> CarWashRead:
+        if isinstance(car_wash, CarWash):
+            car_wash = CarWashRead.model_validate(car_wash)
+
+        img_link = car_wash.image_link
+
+        if car_wash.image_path and (
+            not img_link or not validate_link(img_link, car_wash.image_path)
+        ):
+            image_link = await self.s3_service.generate_link(
+                car_wash.image_path
+            )
+
+            image_link = HttpUrl(image_link)
+            car_wash.image_link = image_link
+            new_img_link = f'{image_link.path}?{image_link.query}'
+
+            bg_tasks.add_task(
+                self.crud_repo.change_one,
+                car_wash.id,
+                {'image_link': new_img_link},
+            )
+
+        return car_wash
+
+    async def update_car_wash(
+        self,
+        id: int,
+        new_values: CarWashUpdate,
+        img: UploadFile | None,
+        bg_tasks: BackgroundTasks,
+    ) -> CarWashRead:
+        if img:
+            car_wash = await self.read_entity(id)
+            unique_filename = await self.s3_service.upload_file(
+                S3Folders.CAR_WASHES, img, car_wash.image_path
+            )
+
+            new_values.image_path = unique_filename
+
+        updated_car_wash = await self.update_entity(id, new_values)
+        return await self.add_img_link_to_car_wash(updated_car_wash, bg_tasks)
+
+    async def delete_car_wash(self, id: int) -> CarWash:
+        car_wash = await self.crud_repo.delete_one(id)
+        await self.s3_service.remove_file(car_wash.image_path)
+        return car_wash

@@ -34,8 +34,3 @@ RefreshTokenIsUsedExc = HTTPException(
 class MissingCredentialsError(ValueError):
     def __init__(self):
         super().__init__('id or both username and password is required')
-
-
-class PasswordIsNotHashedError(ValueError):
-    def __init__(self):
-        super().__init__('Password must be hashed')
