@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, UploadFile
 
 from car_wash.auth.exceptions import RefreshTokenIsUsedExc
 from car_wash.auth.schemas import Tokens, UserCredentials
@@ -30,8 +30,10 @@ class AuthService:
         self.token_service = token_service
         self.password_service = pass_service
 
-    async def register(self, new_user: UserRegistration) -> Tokens:
-        user_id = await self.user_service.create_user(new_user)
+    async def register(
+        self, new_user: UserRegistration, img: UploadFile | None
+    ) -> Tokens:
+        user_id = await self.user_service.create_user(new_user, img)
         access_token, refresh_token = self.token_service.create_tokens(
             sub=user_id
         )

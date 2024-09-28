@@ -1,14 +1,10 @@
 from typing import Self
 
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, model_validator
 
-from car_wash.auth.exceptions import (
-    MissingCredentialsError,
-    PasswordIsNotHashedError,
-)
-from car_wash.auth.utils import pwd_context
-from car_wash.users.schemas import UserRead, UserRegistration
+from car_wash.auth.exceptions import MissingCredentialsError
+from car_wash.users.schemas import UserRead
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='jwt/token')
 
@@ -38,20 +34,7 @@ class UserCredentials(BaseModel):
         return self
 
 
-class UserForDB(UserRegistration):
-    password: str = Field(exclude=True)
-    hashed_password: str
-    role_id: int
-
-    @field_validator('hashed_password')
-    @classmethod
-    def check_hashed_password(cls, v: str) -> str:
-        if not pwd_context.identify(v):
-            raise PasswordIsNotHashedError
-        return v
-
-
-class UserInDB(UserRead):
+class UserWithPass(UserRead):
     hashed_password: str = Field(default=None, exclude=True)
 
     class Config:

@@ -10,6 +10,7 @@ from car_wash.auth.exceptions import (
 )
 from car_wash.auth.schemas import oauth2_scheme
 from car_wash.auth.utils import AnnTokenService, TokenType
+from car_wash.users.models import User
 from car_wash.users.schemas import UserReadWithRole
 from car_wash.users.service import AnnUserService
 from car_wash.utils.repository import AnyModel
@@ -96,8 +97,13 @@ def check_user_id(
     value: GenericListRequest | AnyModel, current_user: UserReadWithRole
 ) -> None:
     if (
-        hasattr(value, 'user_id')
-        and value.user_id != current_user.id
+        (
+            hasattr(value, 'user_id')
+            and value.user_id != current_user.id
+            and current_user.role.name != 'admin'
+        )
+        or isinstance(value, User)
+        and current_user.id != value.id
         and current_user.role.name != 'admin'
     ):
         raise UserIdIsNotSetExc
