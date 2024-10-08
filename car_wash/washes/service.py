@@ -5,19 +5,31 @@ from datetime import datetime, timedelta
 from fastapi import BackgroundTasks, UploadFile
 from pydantic import HttpUrl
 
+from car_wash.cars.body_types.repository import CarBodyTypeRepository
 from car_wash.storage.schemas import S3Folders
 from car_wash.storage.service import S3Service
 from car_wash.storage.utils import validate_link
 from car_wash.utils.schemas import GenericListResponse
 from car_wash.utils.service import GenericCRUDService
-from car_wash.washes.models import CarWash
+from car_wash.washes.bookings.schemas import BookingCreate
+from car_wash.washes.exceptions import (
+    AlreadyActiveError,
+    AlreadyNotActiveError,
+    MissingRequiredBodyTypesError,
+    NotEnoughScheduleRecordsError,
+)
+from car_wash.washes.models import Box, CarWash
+from car_wash.washes.prices.repository import CarWashPriceRepository
 from car_wash.washes.repository import CarWashRepository, RowProtocol
+from car_wash.washes.schedules.repository import ScheduleRepository
 from car_wash.washes.schemas import (
     CarWashCreate,
     CarWashList,
     CarWashRead,
     CarWashUpdate,
 )
+
+NUMBER_OF_DAYS_IN_WEEK = 7
 
 
 class CarWashService(GenericCRUDService[CarWash]):
@@ -27,6 +39,9 @@ class CarWashService(GenericCRUDService[CarWash]):
     def __init__(self):
         super().__init__()
         self.s3_service = S3Service()
+        self.schedule_repo = ScheduleRepository()
+        self.body_type_repo = CarBodyTypeRepository()
+        self.price_repo = CarWashPriceRepository()
         self.available_slots_by_box = None
         self.schedule_end_by_box = None
         self.last_end_time_by_box = None
@@ -133,6 +148,26 @@ class CarWashService(GenericCRUDService[CarWash]):
                         (new_start, new_end)
                     )
 
+    async def is_booking_possible(
+        self, box: Box, new_booking: BookingCreate
+    ) -> bool:
+        available_times = await self.get_available_times(
+            box.car_wash_id, new_booking.start_datetime.date()
+        )
+        if not available_times or box.id not in available_times:
+            return False
+
+        for datetime_range in available_times[box.id]:
+            start_dt = datetime_range[0]
+            end_dt = datetime_range[1]
+            if (
+                start_dt <= new_booking.start_datetime
+                and end_dt >= new_booking.end_datetime
+            ):
+                return True
+
+        return False
+
     async def create_car_wash(
         self,
         new_car_wash: CarWashCreate,
@@ -221,3 +256,33 @@ class CarWashService(GenericCRUDService[CarWash]):
         car_wash = await self.crud_repo.delete_one(id)
         await self.s3_service.remove_file(car_wash.image_path)
         return car_wash
+
+    async def show_car_wash(self, id: int) -> None:
+        car_wash = await self.crud_repo.find_one(id)
+
+        if car_wash.active is True:
+            raise AlreadyActiveError
+
+        records = await self.schedule_repo.count_records(
+            filters=[self.schedule_repo.model.car_wash_id == id]
+        )
+
+        if records != NUMBER_OF_DAYS_IN_WEEK:
+            raise NotEnoughScheduleRecordsError(records)
+
+        necessary_bts = await self.body_type_repo.find_necessary_bts_ids()
+
+        existing_body_types = set(
+            await self.price_repo.select_body_types_from_price(id)
+        )
+        if not all(bt_id in existing_body_types for bt_id in necessary_bts):
+            raise MissingRequiredBodyTypesError
+
+        await self.crud_repo.change_one(id, {'active': True})
+
+    async def hide_car_wash(self, id: int) -> None:
+        car_wash = await self.crud_repo.find_one(id)
+
+        if car_wash.active is True:
+            raise AlreadyNotActiveError
+        await self.crud_repo.change_one(id, {'active': False})

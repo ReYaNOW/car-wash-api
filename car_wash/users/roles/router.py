@@ -14,7 +14,7 @@ admin_router = get_admin_router('/roles', tags=['Users|Roles'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_role(new_role: schemas.RoleCreate):
-    role_id = await RoleService().create_entity(new_role)
+    role_id = await RoleService().create_entities(new_role)
     return {'role_id': role_id}
 
 

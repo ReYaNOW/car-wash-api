@@ -71,7 +71,17 @@ class CarBodyType(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True)
+    parent_id: Mapped[int] = mapped_column(
+        ForeignKey('car__body_type.id', ondelete='RESTRICT'), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    parent: Mapped['CarBodyType'] = relationship(
+        'CarBodyType', remote_side=[id], back_populates='children'
+    )
+    children: Mapped[list['CarBodyType']] = relationship(
+        'CarBodyType', back_populates='parent'
+    )
 
     configurations: Mapped[list['CarConfiguration']] = relationship(
         back_populates='body_type'

@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: cdacd09ebc86
+Revision ID: f0af2921b756
 Revises:
-Create Date: 2024-09-28 20:09:59.460977
+Create Date: 2024-10-08 18:15:59.183345
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cdacd09ebc86'
+revision: str = 'f0af2921b756'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,7 +23,9 @@ def upgrade() -> None:
     op.create_table('car__body_type',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('parent_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['parent_id'], ['car__body_type.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -60,6 +62,7 @@ def upgrade() -> None:
     op.create_table('car_wash',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('active', sa.Boolean(), nullable=False),
     sa.Column('image_path', sa.String(), nullable=True),
     sa.Column('image_link', sa.String(), nullable=True),
     sa.Column('location_id', sa.Integer(), nullable=False),
@@ -104,6 +107,17 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ondelete='RESTRICT'),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_table('car_wash__price',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('car_wash_id', sa.Integer(), nullable=False),
+    sa.Column('body_type_id', sa.Integer(), nullable=False),
+    sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['body_type_id'], ['car__body_type.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['car_wash_id'], ['car_wash.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('car_wash_id', 'body_type_id', name='uix_car_wash_price___car_wash_id__body_type_id')
+    )
     op.create_table('car_wash__schedule',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('car_wash_id', sa.Integer(), nullable=False),
@@ -113,7 +127,8 @@ def upgrade() -> None:
     sa.Column('is_available', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['car_wash_id'], ['car_wash.id'], ondelete='RESTRICT'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('car_wash_id', 'day_of_week', name='uix_car_wash_schedule___car_wash_id__day_of_week')
     )
     op.create_table('user__refresh_token',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -139,6 +154,7 @@ def upgrade() -> None:
     sa.Column('id', sa.BigInteger(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('box_id', sa.Integer(), nullable=False),
+    sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=True),
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('end_datetime', sa.DateTime(), nullable=False),
     sa.Column('is_exception', sa.Boolean(), nullable=False),
@@ -170,6 +186,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_user__refresh_token_token'), table_name='user__refresh_token')
     op.drop_table('user__refresh_token')
     op.drop_table('car_wash__schedule')
+    op.drop_table('car_wash__price')
     op.drop_table('car_wash__box')
     op.drop_table('car__generation')
     op.drop_table('user')

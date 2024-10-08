@@ -16,7 +16,7 @@ admin_router = get_admin_router('/configurations', tags=['Cars|Configuration'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_configuration(new_configuration: schemas.ConfigurationCreate):
-    configuration_id = await CarConfigurationService().create_entity(
+    configuration_id = await CarConfigurationService().create_entities(
         new_configuration
     )
     return {'configuration_id': configuration_id}
