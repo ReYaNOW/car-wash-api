@@ -12,7 +12,7 @@ from car_wash.utils.custom_swagger_docs import (
     create_custom_swagger_docs,
     tags_metadata,
 )
-from car_wash.utils.fill_db import add_default_users_and_roles
+from car_wash.utils.data_migration.fill_db import add_default_users_and_roles
 from car_wash.washes.router import router as car_washes_router
 from car_wash.washes.router import sub_router as car_wash_locations_router
 
