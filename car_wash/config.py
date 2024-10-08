@@ -21,7 +21,7 @@ class Config(BaseSettings):
 
     filling_db: bool = False
 
-    model_config = SettingsConfigDict(env_file='.env')
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
 
 config = Config()
