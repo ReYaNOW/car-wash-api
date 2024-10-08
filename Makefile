@@ -1,5 +1,5 @@
 install:
-	poetry install --no-root
+	poetry install
 	poetry run pre-commit install
 
 dev:
