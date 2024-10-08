@@ -31,3 +31,6 @@ db_migrations:
 
 migrate:
 	poetry run alembic upgrade head
+
+get_loc:
+	pygount --folders-to-skip="[...]data_sets" -f summary car_wash/
