@@ -81,13 +81,13 @@ async def get_available_times(id: int, date: datetime.date):
     return {'available_times': available_times}
 
 
-@client_router.get('/{id}/show', response_model=schemas.ShowHideResponse)
+@client_router.post('/{id}/show', response_model=schemas.ShowHideResponse)
 async def show_car_wash(id: int):
     await CarWashService().show_car_wash(id)
     return {'status': 'This car wash is now showing'}
 
 
-@client_router.get('/{id}/hide', response_model=schemas.ShowHideResponse)
+@client_router.post('/{id}/hide', response_model=schemas.ShowHideResponse)
 async def hide_car_wash(id: int):
     await CarWashService().hide_car_wash(id)
     return {'status': 'This car wash is now hidden'}
