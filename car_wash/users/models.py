@@ -31,8 +31,8 @@ class User(Base):
     image_path: Mapped[str] = mapped_column(nullable=True)
     image_link: Mapped[str] = mapped_column(nullable=True)
 
-    confirmed: Mapped[bool] = mapped_column()
-    active: Mapped[bool] = mapped_column()
+    confirmed: Mapped[bool]
+    active: Mapped[bool]
     role_id: Mapped[int] = mapped_column(ForeignKey(Role.id))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
