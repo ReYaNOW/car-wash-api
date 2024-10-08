@@ -28,6 +28,9 @@ class CarWash(Base):
 
     schedules: Mapped['Schedule'] = relationship(back_populates='car_wash')
     boxes: Mapped['Box'] = relationship(back_populates='car_wash')
+    prices: Mapped['CarWashPrice'] = relationship(
+        'CarWashPrice', back_populates='car_wash'
+    )
 
 
 class Schedule(Base):
