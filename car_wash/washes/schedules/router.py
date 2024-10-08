@@ -14,8 +14,14 @@ admin_router = get_admin_router('/schedules', tags=['CarWashes|Schedules'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_schedule(new_schedule: schemas.ScheduleCreate):
-    schedule_id = await ScheduleService().create_entity(new_schedule)
+    schedule_id = await ScheduleService().create_entities(new_schedule)
     return {'schedule_id': schedule_id}
+
+
+@admin_router.post('/bulk', response_model=schemas.CreateBulkResponse)
+async def create_schedules(new_schedules: list[schemas.ScheduleCreate]):
+    schedule_ids = await ScheduleService().create_entities(new_schedules)
+    return {'schedule_ids': schedule_ids}
 
 
 @client_router.get('/{id}', response_model=schemas.ReadResponse)

@@ -72,12 +72,25 @@ router.include_router(client_router)
 router.include_router(client_owner_router)
 
 if config.debug:
-    from car_wash.utils.fill_db import fill_db
+    from car_wash.utils.data_migration.fill_db import (
+        fill_db_cars,
+        update_db_with_body_types,
+    )
 
     @router.post('/cars/fill_db_with_cars')
     async def fill_db_with_cars(background_tasks: BackgroundTasks):
         if config.filling_db:
             return 'Database is already filling up'
-        background_tasks.add_task(fill_db)
+        background_tasks.add_task(fill_db_cars)
         config.filling_db = True
         return 'Started filling database with cars data'
+
+    @router.post('/cars/fill_db_with_proper_body_types')
+    async def update_db_with_proper_body_types(
+        background_tasks: BackgroundTasks,
+    ):
+        if config.filling_db:
+            return 'Database is already filling up'
+        background_tasks.add_task(update_db_with_body_types)
+        config.filling_db = True
+        return 'Started filling database with proper body types'

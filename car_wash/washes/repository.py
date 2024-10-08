@@ -2,7 +2,8 @@ from datetime import date as dt
 from datetime import datetime, time
 from typing import Protocol
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, or_
+from sqlalchemy.future import select
 
 from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import orm_errors_handler
@@ -31,6 +32,7 @@ class CarWashRepository(SQLAlchemyRepository[CarWash]):
         day_of_week = date.weekday()
         start_of_day = datetime.combine(date, time.min)
         end_of_day = datetime.combine(date, time.max)
+
         async with async_session_maker() as session:
             query = (
                 select(

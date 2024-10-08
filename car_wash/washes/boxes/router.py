@@ -14,7 +14,7 @@ admin_router = get_admin_router('/boxes', tags=['CarWashes|Boxes'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_box(new_boxes: schemas.BoxCreate):
-    box_id = await BoxService().create_entity(new_boxes)
+    box_id = await BoxService().create_entities(new_boxes)
     return {'box_id': box_id}
 
 

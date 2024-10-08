@@ -14,7 +14,9 @@ admin_router = get_admin_router('/generations', tags=['Cars|Generations'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_generation(new_generation: schemas.GenerationCreate):
-    generation_id = await CarGenerationService().create_entity(new_generation)
+    generation_id = await CarGenerationService().create_entities(
+        new_generation
+    )
     return {'generation_id': generation_id}
 
 

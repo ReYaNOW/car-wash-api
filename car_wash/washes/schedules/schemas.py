@@ -56,6 +56,10 @@ class CreateResponse(BaseModel):
     schedule_id: int
 
 
+class CreateBulkResponse(BaseModel):
+    schedule_ids: list[int]
+
+
 class ReadResponse(ScheduleRead):
     pass
 

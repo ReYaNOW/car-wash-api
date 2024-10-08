@@ -67,10 +67,18 @@ class SQLAlchemyRepository(AbstractRepository[T]):
     @orm_errors_handler
     async def add_one(self, data: dict) -> int:
         async with async_session_maker() as session:
-            stmt = insert(self.model).values(**data).returning(self.model.id)
+            stmt = insert(self.model).values(data).returning(self.model.id)
             res = await session.execute(stmt)
             await session.commit()
             return res.scalar_one()
+
+    @orm_errors_handler
+    async def add_many(self, data: dict) -> list[int]:
+        async with async_session_maker() as session:
+            stmt = insert(self.model).values(data).returning(self.model.id)
+            res = await session.execute(stmt)
+            await session.commit()
+            return res.scalars().all()
 
     @orm_errors_handler
     async def find_one(self, id: int, relationships: list | None = None) -> T:
@@ -97,12 +105,26 @@ class SQLAlchemyRepository(AbstractRepository[T]):
             return res.scalar()
 
     @orm_errors_handler
+    async def find_one_by_custom_fields(
+        self,
+        filters: dict[str, str | int],
+        relationships: list | None = None,
+    ) -> T:
+        expressions = self.get_expressions(filters)
+        async with async_session_maker() as session:
+            query = select(self.model).where(and_(*expressions))
+            query = self.add_joined_loads(query, relationships)
+
+            res = await session.execute(query)
+            return res.scalar()
+
+    @orm_errors_handler
     async def find_many(
         self,
         page: int,
         limit: int,
         order_by: str,
-        filters: dict,
+        filters: dict | list[BinaryExpression],
         relationships: list | None = None,
     ) -> list[T]:
         offset_value = page * limit - limit
@@ -186,8 +208,12 @@ class SQLAlchemyRepository(AbstractRepository[T]):
         return query.options(*joined_loads)
 
     def get_expressions(
-        self, filters: dict[str, str | int]
+        self, filters: dict[str, str | int] | list[BinaryExpression]
     ) -> list[BinaryExpression]:
+        if isinstance(filters, list) and isinstance(
+            filters[0], BinaryExpression
+        ):
+            return filters
         expressions = []
         for k, v in filters.items():
             if k.endswith('_like'):

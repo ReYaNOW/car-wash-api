@@ -14,7 +14,7 @@ admin_router = get_admin_router('/brands', tags=['Cars|Brands'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_brand(new_brand: schemas.BrandCreate):
-    brand_id = await CarBrandService().create_entity(new_brand)
+    brand_id = await CarBrandService().create_entities(new_brand)
     return {'brand_id': brand_id}
 
 

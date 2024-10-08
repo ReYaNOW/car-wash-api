@@ -14,7 +14,7 @@ admin_router = get_admin_router('/locations', tags=['CarWashes|Locations'])
 
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_location(new_location: schemas.CarWashLocationCreate):
-    location_id = await CarWashLocationService().create_entity(new_location)
+    location_id = await CarWashLocationService().create_entities(new_location)
     return {'location_id': location_id}
 
 

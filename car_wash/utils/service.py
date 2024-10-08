@@ -3,19 +3,25 @@ from typing import Generic
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from car_wash.utils.repository import AbstractRepository, T
+from car_wash.utils.repository import SQLAlchemyRepository, T
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class GenericCRUDService(Generic[T]):
-    repository: type[AbstractRepository]
+    repository: type[SQLAlchemyRepository]
 
     def __init__(self):
-        self.crud_repo: AbstractRepository = self.repository()
+        self.crud_repo: SQLAlchemyRepository = self.repository()
 
-    async def create_entity(self, new_entity: BaseModel) -> int:
-        entity_dict = new_entity.model_dump()
-        entity_id = await self.crud_repo.add_one(entity_dict)
+    async def create_entities(
+        self, new_entity: BaseModel | list[BaseModel]
+    ) -> int | list[int]:
+        if isinstance(new_entity, list):
+            entities_dict = [entity.model_dump() for entity in new_entity]
+            entity_ids = await self.crud_repo.add_many(entities_dict)
+            return entity_ids
+        entities_dict = new_entity.model_dump()
+        entity_id = await self.crud_repo.add_one(entities_dict)
         return entity_id
 
     async def read_entity(self, id: int) -> T:

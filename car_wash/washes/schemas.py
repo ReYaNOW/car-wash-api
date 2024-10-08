@@ -15,12 +15,14 @@ class CarWashCreate(CustomBaseModel):
     name: str = Field(examples=['Spa Detailing'])
     location_id: int = Field(examples=[1])
 
+    active: SkipJsonSchema[bool] = Field(default=False)
     image_path: SkipJsonSchema[str | None] = Field(default=None)
 
 
 class CarWashRead(BaseModel):
     id: int
     name: str
+    active: bool
 
     image_path: str | None = None
     image_link: HttpUrl | None = None
@@ -49,6 +51,7 @@ class CarWashRead(BaseModel):
 
 class CarWashList(GenericListRequest):
     order_by: Literal['id', 'name', 'location_id'] = 'id'
+    active: bool | None = None
 
 
 class CarWashUpdate(CustomBaseModel):
@@ -80,3 +83,7 @@ class DeleteResponse(BaseModel):
 
 class AvailableTimesResponse(BaseModel):
     available_times: dict[int, list[tuple[datetime, datetime]]]
+
+
+class ShowHideResponse(BaseModel):
+    status: str

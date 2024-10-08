@@ -12,9 +12,19 @@ client_router = get_client_router('/body_types', tags=['Cars|BodyTypes'])
 admin_router = get_admin_router('/body_types', tags=['Cars|BodyTypes'])
 
 
+@client_router.get('/necessary', response_model=schemas.ListResponse)
+async def list_necessary_body_types(
+    query: Annotated[schemas.BodyTypeList, Depends()],
+):
+    paginated_body_types = await CarBodyTypeService().paginate_necessary_bts(
+        query
+    )
+    return paginated_body_types
+
+
 @admin_router.post('', response_model=schemas.CreateResponse)
 async def create_body_type(new_body_type: schemas.BodyTypeCreate):
-    body_type_id = await CarBodyTypeService().create_entity(new_body_type)
+    body_type_id = await CarBodyTypeService().create_entities(new_body_type)
     return {'body_type_id': body_type_id}
 
 

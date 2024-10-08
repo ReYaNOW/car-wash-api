@@ -9,6 +9,7 @@ from car_wash.washes import schemas
 from car_wash.washes.bookings.router import router as bookings_router
 from car_wash.washes.boxes.router import router as boxes_router
 from car_wash.washes.locations.router import router as locations_router
+from car_wash.washes.prices.router import router as prices_router
 from car_wash.washes.schedules.router import router as schedules_router
 from car_wash.washes.service import CarWashService
 
@@ -20,6 +21,7 @@ sub_router.include_router(locations_router)
 sub_router.include_router(schedules_router)
 sub_router.include_router(boxes_router)
 sub_router.include_router(bookings_router)
+sub_router.include_router(prices_router)
 
 
 client_router = get_client_router('/car_washes', tags=['CarWashes'])
@@ -77,6 +79,18 @@ async def delete_car_wash(id: int):
 async def get_available_times(id: int, date: datetime.date):
     available_times = await CarWashService().get_available_times(id, date)
     return {'available_times': available_times}
+
+
+@client_router.get('/{id}/show', response_model=schemas.ShowHideResponse)
+async def show_car_wash(id: int):
+    await CarWashService().show_car_wash(id)
+    return {'status': 'This car wash is now showing'}
+
+
+@client_router.get('/{id}/hide', response_model=schemas.ShowHideResponse)
+async def hide_car_wash(id: int):
+    await CarWashService().hide_car_wash(id)
+    return {'status': 'This car wash is now hidden'}
 
 
 router.include_router(admin_router)
