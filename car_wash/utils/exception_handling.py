@@ -69,6 +69,8 @@ def orm_errors_handler(
     ) -> Any:
         try:
             result = await func(self, *args, **kwargs)
+            if result is None:
+                raise HTTPException(status_code=404)
         except IntegrityError as e:
             handle_integrity_error(e, self.model.__tablename__)
         else:
