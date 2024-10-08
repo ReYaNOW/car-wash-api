@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "car_wash"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.11,<3.13"
 fastapi = {extras = ["standard"], version = "^0.115.0"}
 sqlalchemy = "^2.0.32"
 asyncpg = "^0.29.0"
@@ -23,6 +23,7 @@ types-aiobotocore-lite = {extras = ["essential"], version = "^2.15.1"}
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.4"
 pre-commit = "^3.8.0"
+pygount = "^1.8.0"
 
 [build-system]
 requires = ["poetry-core"]
