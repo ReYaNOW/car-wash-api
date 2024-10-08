@@ -105,4 +105,4 @@ pyrightconfig.json
 # ignore static django files
 staticfiles/
 
-base.json
+cars.json
