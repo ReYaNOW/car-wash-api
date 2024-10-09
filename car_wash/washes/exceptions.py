@@ -22,7 +22,7 @@ class NotTwoHoursError(ValueError):
 class NotEnoughScheduleRecordsError(HTTPException):
     def __init__(self, number: int | str):
         super().__init__(
-            status_code=400,
+            status_code=409,
             detail=f'There should be 7 records for schedule per car wash, '
             f'found: {number}',
         )
@@ -31,31 +31,31 @@ class NotEnoughScheduleRecordsError(HTTPException):
 class MissingRequiredBodyTypesError(HTTPException):
     def __init__(self, missing_body_types: list[int]):
         detail = {
-            'detail': 'There are missing prices for some required '
+            'error': 'There are missing prices for some required '
             'car body types.',
             'missing_body_type_ids': missing_body_types,
         }
-        super().__init__(status_code=400, detail=detail)
+        super().__init__(status_code=409, detail=detail)
 
 
 class AlreadyActiveError(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=400, detail='This car wash already showing'
+            status_code=409, detail='This car wash already showing'
         )
 
 
 class AlreadyNotActiveError(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=400, detail='This car wash already hidden'
+            status_code=409, detail='This car wash already hidden'
         )
 
 
 class BookingIsNotAvailableError(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=400,
+            status_code=409,
             detail='Booking for these start_datetime and end_datetime '
             'is not available',
         )
