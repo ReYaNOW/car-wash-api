@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import Literal, Self
 
 from pydantic import BaseModel, Field, model_validator
@@ -20,7 +21,7 @@ class BookingCreate(BaseModel):
     start_datetime: datetime
     end_datetime: datetime
 
-    price: SkipJsonSchema[float | None] = Field(default=None)
+    price: SkipJsonSchema[Decimal | None] = Field(default=None)
     user_id: SkipJsonSchema[int | None] = Field(default=None)
 
     @model_validator(mode='after')
@@ -39,7 +40,7 @@ class BookingRead(BaseModel):
     user_id: int
     box_id: int
 
-    price: float | None
+    price: Decimal | None
     is_exception: bool
 
     start_datetime: datetime
