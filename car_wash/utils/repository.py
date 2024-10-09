@@ -64,6 +64,8 @@ class AbstractRepository(ABC, Generic[T]):
 
 
 class SQLAlchemyRepository(AbstractRepository[T]):
+    raise_404_when_find_one_not_found = True
+
     @orm_errors_handler
     async def add_one(self, data: dict) -> int:
         async with async_session_maker() as session:
