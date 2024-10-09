@@ -29,12 +29,13 @@ class NotEnoughScheduleRecordsError(HTTPException):
 
 
 class MissingRequiredBodyTypesError(HTTPException):
-    def __init__(self):
-        super().__init__(
-            status_code=400,
-            detail='There are missing prices for certain required '
-            'car body types',
-        )
+    def __init__(self, missing_body_types: list[int]):
+        detail = {
+            'detail': 'There are missing prices for some required '
+            'car body types.',
+            'missing_body_type_ids': missing_body_types,
+        }
+        super().__init__(status_code=400, detail=detail)
 
 
 class AlreadyActiveError(HTTPException):
@@ -54,7 +55,7 @@ class AlreadyNotActiveError(HTTPException):
 class BookingIsNotAvailableError(HTTPException):
     def __init__(self):
         super().__init__(
-            status_code=409,
+            status_code=400,
             detail='Booking for these start_datetime and end_datetime '
             'is not available',
         )

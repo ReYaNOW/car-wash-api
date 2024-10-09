@@ -275,8 +275,13 @@ class CarWashService(GenericCRUDService[CarWash]):
         existing_body_types = set(
             await self.price_repo.select_body_types_from_price(id)
         )
-        if not all(bt_id in existing_body_types for bt_id in necessary_bts):
-            raise MissingRequiredBodyTypesError
+        missing_body_types = [
+            bt_id
+            for bt_id in necessary_bts
+            if bt_id not in existing_body_types
+        ]
+        if missing_body_types:
+            raise MissingRequiredBodyTypesError(missing_body_types)
 
         await self.crud_repo.change_one(id, {'active': True})
 
