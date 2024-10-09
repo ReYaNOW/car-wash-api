@@ -15,6 +15,7 @@ class BodyTypeCreate(BaseModel):
 class BodyTypeRead(BaseModel):
     id: int
     name: str
+    parent_id: int | None
     created_at: datetime
 
     class Config:
