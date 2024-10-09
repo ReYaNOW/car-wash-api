@@ -1,3 +1,4 @@
+from car_wash.cars.body_types.repository import CarBodyTypeRepository
 from car_wash.cars.configurations.repository import CarConfigurationRepository
 from car_wash.cars.repository import UserCarRepository
 from car_wash.users.models import User
@@ -21,6 +22,7 @@ class BookingService(GenericCRUDService[Booking]):
         self.price_repo = CarWashPriceRepository()
         self.user_car_repo = UserCarRepository()
         self.car_config_repo = CarConfigurationRepository()
+        self.car_body_type_repo = CarBodyTypeRepository()
 
     async def create_booking(
         self, user: User, new_booking: BookingCreate
@@ -37,12 +39,25 @@ class BookingService(GenericCRUDService[Booking]):
         )
 
         price_model = self.price_repo.model
+        self.price_repo.raise_404_when_find_one_not_found = False
         price_entity = await self.price_repo.find_one_by_custom_fields(
             [
                 price_model.car_wash_id == box.car_wash_id,
                 price_model.body_type_id == car_config.body_type_id,
             ]
         )
+        self.price_repo.raise_404_when_find_one_not_found = True
+        if not price_entity:
+            body_type = await self.car_body_type_repo.find_one(
+                car_config.body_type_id
+            )
+
+            price_entity = await self.price_repo.find_one_by_custom_fields(
+                [
+                    price_model.car_wash_id == box.car_wash_id,
+                    price_model.body_type_id == body_type.parent_id,
+                ]
+            )
 
         new_booking.price = price_entity.price
         new_booking.user_id = user.id
