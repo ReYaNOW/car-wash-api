@@ -1,4 +1,4 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, Field, computed_field
 from sqlalchemy import TableClause
 from sqlalchemy.orm import Mapped
 
@@ -10,8 +10,8 @@ class AnyModel(TableClause):
 
 
 class GenericListRequest(BaseModel):
-    page: int = 1
-    limit: int = 10
+    page: int = Field(default=1, ge=1)
+    limit: int = Field(default=10, ge=1)
 
 
 class GenericListResponse(BaseModel):
