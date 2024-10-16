@@ -80,9 +80,7 @@ class UserReadWithRole(UserRead):
 
 
 class UserList(GenericListRequest):
-    order_by: Literal[
-        'id', 'username', 'password', 'first_name', 'last_name', 'created_at'
-    ] = 'id'
+    order_by: Literal['id', 'username', 'first_name', 'last_name'] = 'id'
 
 
 class UserUpdate(CustomBaseModel):
