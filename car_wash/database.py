@@ -13,7 +13,9 @@ db_url = config.database_url.unicode_string()
 
 
 async_url = db_url.replace('postgresql', 'postgresql+asyncpg')
-async_engine = create_async_engine(async_url)
+async_engine = create_async_engine(
+    async_url, pool_recycle=1800, pool_pre_ping=True
+)
 async_session_maker = async_sessionmaker(async_engine, expire_on_commit=False)
 
 
