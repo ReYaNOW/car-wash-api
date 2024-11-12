@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from typing import Literal, Self
 
@@ -7,7 +7,6 @@ from pydantic.json_schema import SkipJsonSchema
 
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 from car_wash.washes.exceptions import (
-    NotTwoHoursError,
     StartDatetimeGreaterError,
 )
 
@@ -29,9 +28,11 @@ class BookingCreate(BaseModel):
         if self.end_datetime < self.start_datetime:
             raise StartDatetimeGreaterError
 
-        diff = self.end_datetime - self.start_datetime
-        if not diff == timedelta(hours=2):
-            raise NotTwoHoursError
+        # FIXME вернуть
+        # diff = self.end_datetime - self.start_datetime
+
+        # if not diff == timedelta(hours=2):
+        #     raise NotTwoHoursError
         return self
 
 

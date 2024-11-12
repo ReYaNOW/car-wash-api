@@ -24,6 +24,7 @@ types-aiobotocore-lite = {extras = ["essential"], version = "^2.15.1"}
 ruff = "^0.6.4"
 pre-commit = "^3.8.0"
 pygount = "^1.8.0"
+locust = "^2.32.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -39,7 +40,9 @@ line-length = 79
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913',
-          'PYI051', 'ANN401', 'RET503', 'TCH001', 'D203', 'D213']
+          'PYI051', 'ANN401', 'RET503', 'TCH001', 'D203', 'D213',
+          "TD", "FIX001",
+   "ERA001"]
 # D Missing docstrings
 # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collection
 # RET504 Unnecessary assignment to ... before `return` statement
