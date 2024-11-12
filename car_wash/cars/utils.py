@@ -31,4 +31,4 @@ def validate_year_range(year_range: str) -> None:
 
 def check_one_year_range(value: int) -> None:
     if not MINIMAL_CAR_YEAR <= value <= MAX_CAR_YEAR:
-        raise InvalidYearRangeError
+        raise InvalidYearRangeError(MINIMAL_CAR_YEAR, MAX_CAR_YEAR)
