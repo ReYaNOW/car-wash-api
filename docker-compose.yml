@@ -1,5 +1,6 @@
 services:
   web:
+    restart: on-failure
     build: .
     ports:
       - "8000:8000"
