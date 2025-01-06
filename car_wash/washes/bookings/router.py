@@ -16,7 +16,7 @@ client_router = get_client_router('/bookings', tags=['CarWashes|Bookings'])
 client_owner_router = get_owner_router(
     '/bookings', BookingService, tags=['CarWashes|Bookings']
 )
-admin_router = get_admin_router('/prices', tags=['CarWashes|Bookings'])
+admin_router = get_admin_router('/bookings', tags=['CarWashes|Bookings'])
 
 
 @client_router.post('', response_model=schemas.CreateResponse)
