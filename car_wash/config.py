@@ -22,7 +22,7 @@ class Config(BaseSettings):
     debug: bool = False
     in_docker: bool = True
 
-    filling_db: bool = True
+    filling_db: bool = False
 
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
