@@ -7,6 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Config(BaseSettings):
     database_url: PostgresDsn
     secret_key: str
+    public_minio: HttpUrl = None
+
     access_token_expire_minutes: int
     refresh_token_expire_days: int
 
