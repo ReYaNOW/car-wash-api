@@ -15,6 +15,7 @@ from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 class UserBase(CustomBaseModel):
     username: str = Field(examples=['Username'])
     password: str = Field(examples=['password123'], exclude=True)
+    phone_number: str = Field(examples=['+79991356261'])
     first_name: str = Field(examples=['FirstName'])
     last_name: str = Field(examples=['LastName'])
 
@@ -43,6 +44,7 @@ class UserCreate(UserBase):
 class UserRead(BaseModel):
     id: int
     username: str
+    phone_number: str | None = None
 
     first_name: str
     last_name: str

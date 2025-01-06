@@ -1,6 +1,21 @@
 services:
+  web:
+    restart: on-failure
+    build: .
+    ports:
+      - "8000:8000"
+    command: poetry run fastapi run --port 8000 /car_wash/main.py
+    volumes:
+      - ./car_wash:/car_wash
+    env_file:
+      - .env
+    environment:
+      IN_DOCKER: True
+    depends_on:
+      - db
+
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     restart: always
     environment:
       POSTGRES_USER: pguser

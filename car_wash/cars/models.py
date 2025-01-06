@@ -127,10 +127,14 @@ class UserCar(Base):
         ForeignKey(CarConfiguration.id, ondelete='RESTRICT')
     )
     is_verified: Mapped[bool]
+    license_plate: Mapped[str]
 
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    user = relationship('User', back_populates='cars')
+    user = relationship(
+        'User', back_populates='cars', uselist=False, lazy='joined'
+    )
     configuration: Mapped['CarConfiguration'] = relationship(
         back_populates='user_cars'
     )
+    bookings = relationship('Booking', back_populates='user_car')

@@ -24,6 +24,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(64), unique=True)
     hashed_password: Mapped[str]
+    phone_number: Mapped[str | None]
 
     first_name: Mapped[str]
     last_name: Mapped[str]
@@ -36,6 +37,7 @@ class User(Base):
     role_id: Mapped[int] = mapped_column(ForeignKey(Role.id))
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
-    role = relationship('Role', back_populates='users')
+    role = relationship(
+        'Role', back_populates='users', uselist=False, lazy='joined'
+    )
     cars = relationship('UserCar', back_populates='user')
-    bookings = relationship('Booking', back_populates='user')

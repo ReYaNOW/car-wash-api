@@ -3,7 +3,7 @@ from datetime import datetime, time
 from sqlalchemy import BigInteger, ForeignKey, Numeric, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from car_wash.cars.models import CarBodyType
+from car_wash.cars.models import CarBodyType, UserCar
 from car_wash.database import Base
 from car_wash.users.models import User
 from car_wash.washes.locations.models import CarWashLocation
@@ -30,6 +30,13 @@ class CarWash(Base):
     boxes: Mapped['Box'] = relationship(back_populates='car_wash')
     prices: Mapped['CarWashPrice'] = relationship(
         'CarWashPrice', back_populates='car_wash'
+    )
+
+    location: Mapped['CarWashLocation'] = relationship(
+        'CarWashLocation',
+        back_populates='car_washes',
+        uselist=False,
+        lazy='joined',
     )
 
 
@@ -75,7 +82,7 @@ class Box(Base):
 
     # Relationships
     car_wash: Mapped['CarWash'] = relationship(
-        'CarWash', back_populates='boxes'
+        'CarWash', back_populates='boxes', uselist=False, lazy='joined'
     )
     washer: Mapped['User'] = relationship('User')
     bookings: Mapped['Booking'] = relationship('Booking', back_populates='box')
@@ -85,8 +92,8 @@ class Booking(Base):
     __tablename__ = 'car_wash__booking'
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey(User.id, ondelete='RESTRICT')
+    user_car_id: Mapped[int] = mapped_column(
+        ForeignKey(UserCar.id, ondelete='RESTRICT')
     )
     box_id: Mapped[int] = mapped_column(
         ForeignKey(Box.id, ondelete='RESTRICT')
@@ -96,12 +103,19 @@ class Booking(Base):
     start_datetime: Mapped[datetime]
     end_datetime: Mapped[datetime]
 
+    is_accepted: Mapped[bool] = mapped_column(default=False)
+    is_completed: Mapped[bool] = mapped_column(default=False)
+
     is_exception: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     # Relationships
-    user: Mapped['User'] = relationship('User', back_populates='bookings')
-    box: Mapped['Box'] = relationship('Box', back_populates='bookings')
+    user_car: Mapped['UserCar'] = relationship(
+        'UserCar', back_populates='bookings', uselist=False, lazy='joined'
+    )
+    box: Mapped['Box'] = relationship(
+        'Box', back_populates='bookings', uselist=False, lazy='joined'
+    )
 
 
 class CarWashPrice(Base):

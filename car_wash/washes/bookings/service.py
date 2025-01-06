@@ -1,7 +1,6 @@
 from car_wash.cars.body_types.repository import CarBodyTypeRepository
 from car_wash.cars.configurations.repository import CarConfigurationRepository
 from car_wash.cars.repository import UserCarRepository
-from car_wash.users.models import User
 from car_wash.utils.service import GenericCRUDService
 from car_wash.washes.bookings.repository import BookingRepository
 from car_wash.washes.bookings.schemas import BookingCreate
@@ -24,10 +23,9 @@ class BookingService(GenericCRUDService[Booking]):
         self.car_config_repo = CarConfigurationRepository()
         self.car_body_type_repo = CarBodyTypeRepository()
 
-    async def create_booking(
-        self, user: User, new_booking: BookingCreate
-    ) -> int:
+    async def create_booking(self, new_booking: BookingCreate) -> int:
         box = await self.box_repo.find_one(new_booking.box_id)
+
         if not await self.car_wash_service.is_booking_possible(
             box, new_booking
         ):
@@ -60,7 +58,6 @@ class BookingService(GenericCRUDService[Booking]):
             )
 
         new_booking.price = price_entity.price
-        new_booking.user_id = user.id
 
         entity_dict = new_booking.model_dump()
         entity_id = await self.crud_repo.add_one(entity_dict)

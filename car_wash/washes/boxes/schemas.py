@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
+from car_wash.washes.schemas import CarWashRead
 
 
 class BoxCreate(BaseModel):
@@ -16,6 +17,7 @@ class BoxRead(BaseModel):
     id: int
     name: str
     car_wash_id: int
+    car_wash: CarWashRead = Field(exclude=True)
     user_id: int
     created_at: datetime
 

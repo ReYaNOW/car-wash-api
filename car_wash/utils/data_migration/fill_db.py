@@ -23,15 +23,19 @@ session_maker = sessionmaker(bind=engine)
 
 
 def fill_db_cars():
+    print('до')
     with open(
         'car_wash/utils/data_migration/data_sets/cars.json', encoding='UTF-8'
     ) as file:
         data = json.load(file)
+    print('после')
 
     with session_maker() as session:
+        print('начал')
         counter = 0
         for brand_data in data:
             counter += 1
+            print(counter)
             if counter % 15 == 0:
                 print(counter)
 

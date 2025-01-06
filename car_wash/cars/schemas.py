@@ -2,12 +2,14 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, computed_field
 
+from car_wash.users.schemas import UserReadWithRole
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
 
 
 class UserCarCreate(BaseModel):
     name: str = Field(examples=['My lovely car'])
     configuration_id: int = Field(examples=[1])
+    license_plate: str = Field(examples=['999AAA02'])
 
     @computed_field
     @property
@@ -18,8 +20,11 @@ class UserCarCreate(BaseModel):
 class UserCarRead(BaseModel):
     id: int
     name: str
-    user_id: int
+    is_verified: bool
+    license_plate: str
     configuration_id: int
+
+    user: UserReadWithRole
 
     class Config:
         from_attributes = True

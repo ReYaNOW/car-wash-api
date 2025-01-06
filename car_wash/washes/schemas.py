@@ -9,6 +9,7 @@ from pydantic_core.core_schema import ValidationInfo
 from car_wash.config import config
 from car_wash.storage.schemas import CustomBaseModel
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
+from car_wash.washes.locations.schemas import CarWashLocationRead
 
 
 class CarWashCreate(CustomBaseModel):
@@ -28,6 +29,7 @@ class CarWashRead(BaseModel):
     image_link: HttpUrl | None = None
 
     location_id: int
+    location: CarWashLocationRead
     created_at: datetime
 
     class Config:
