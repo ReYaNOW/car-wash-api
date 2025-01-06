@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from car_wash.utils.routers import (
+    get_admin_router,
     get_client_router,
     get_owner_router,
 )
@@ -15,6 +16,7 @@ client_router = get_client_router('/bookings', tags=['CarWashes|Bookings'])
 client_owner_router = get_owner_router(
     '/bookings', BookingService, tags=['CarWashes|Bookings']
 )
+admin_router = get_admin_router('/prices', tags=['CarWashes|Bookings'])
 
 
 @client_router.post('', response_model=schemas.CreateResponse)
@@ -35,7 +37,7 @@ async def list_bookings(query: Annotated[schemas.BookingList, Depends()]):
     return paginated_bookings
 
 
-@client_owner_router.patch(
+@admin_router.patch(
     '/{id}',
     response_model=schemas.UpdateResponse,
     summary='Update certain fields of existing booking',
@@ -45,7 +47,7 @@ async def update_booking(id: int, new_values: schemas.BookingUpdate):
     return updated_booking
 
 
-@client_owner_router.delete('/{id}', response_model=schemas.DeleteResponse)
+@admin_router.delete('/{id}', response_model=schemas.DeleteResponse)
 async def delete_booking(id: int):
     id_ = await BookingService().delete_entity(id)
     return {'detail': f'booking successfully deleted with id: {id_}'}
@@ -53,3 +55,4 @@ async def delete_booking(id: int):
 
 router.include_router(client_router)
 router.include_router(client_owner_router)
+router.include_router(admin_router)
