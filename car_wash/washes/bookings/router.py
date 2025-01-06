@@ -2,8 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from car_wash.auth.dependencies import get_user_client
-from car_wash.users.models import User
 from car_wash.utils.routers import (
     get_client_router,
     get_owner_router,
@@ -20,11 +18,8 @@ client_owner_router = get_owner_router(
 
 
 @client_router.post('', response_model=schemas.CreateResponse)
-async def create_booking(
-    user: Annotated[User, Depends(get_user_client)],
-    new_booking: schemas.BookingCreate,
-):
-    booking_id = await BookingService().create_booking(user, new_booking)
+async def create_booking(new_booking: schemas.BookingCreate):
+    booking_id = await BookingService().create_booking(new_booking)
     return {'booking_id': booking_id}
 
 
