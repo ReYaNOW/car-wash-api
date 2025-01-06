@@ -71,11 +71,10 @@ class UserRead(BaseModel):
 
         if isinstance(v, Url):
             return v
-        s3_url = config.public_minio or config.s3_server_url
 
-        if isinstance(v, str) and s3_url.host in v:
+        if isinstance(v, str) and config.s3_server_url.host in v:
             return HttpUrl(v)
-        return HttpUrl(f'{s3_url}{v.lstrip("/")}')
+        return HttpUrl(f'{config.s3_server_url}{v.lstrip("/")}')
 
 
 class UserReadWithRole(UserRead):

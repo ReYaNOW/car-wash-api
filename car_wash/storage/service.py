@@ -25,7 +25,9 @@ class S3Service:
         self.config = {
             'aws_access_key_id': config.s3_access_key,
             'aws_secret_access_key': config.s3_secret_access_key,
-            'endpoint_url': config.s3_server_url.unicode_string(),
+            'endpoint_url': config.s3_server_url.unicode_string().replace(
+                config.s3_server_url.host, 'minio'
+            ),
             'use_ssl': config.use_ssl,
         }
         self.bucket_name = config.default_bucket
@@ -143,7 +145,7 @@ class S3Service:
                 Params={'Bucket': self.bucket_name, 'Key': filename},
                 ExpiresIn=EXPIRATION,
             )
-            return url
+            return url.replace('minio', config.s3_server_url.host)
 
     @error_handler
     async def remove_file(self, filename: str) -> None:
