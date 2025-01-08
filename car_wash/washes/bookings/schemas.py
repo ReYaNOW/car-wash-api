@@ -114,15 +114,11 @@ class BookingList(GenericListRequest):
     car_wash_id: int | None = None
 
 
-class BookingUpdate(BookingCreate):
-    user_car_id: int | None = Field(default=None, examples=[1])
-    box_id: int | None = Field(default=None, examples=[1])
-
-    start_datetime: datetime | None = Field(default=None)
-    end_datetime: datetime | None = Field(default=None)
-
+class BookingUpdate(BaseModel):
     state: StateEnum | None = Field(default=None)
-    notes: str | None = None
+    notes: str | None = Field(
+        default=None, examples=['Не открывать багажник!!!']
+    )
 
 
 class CreateResponse(BaseModel):
