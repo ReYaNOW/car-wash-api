@@ -1,6 +1,14 @@
 from datetime import datetime, time
 
-from sqlalchemy import BigInteger, ForeignKey, Numeric, UniqueConstraint, func
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    ForeignKey,
+    Numeric,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from car_wash.cars.models import CarBodyType, UserCar
@@ -16,6 +24,7 @@ class CarWash(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
+    phone_number: Mapped[str | None]
     active: Mapped[bool]
 
     image_path: Mapped[str] = mapped_column(nullable=True)
@@ -37,6 +46,9 @@ class CarWash(Base):
         back_populates='car_washes',
         uselist=False,
         lazy='joined',
+    )
+    additions: Mapped['CarWashAddition'] = relationship(
+        'CarWashAddition', back_populates='car_wash'
     )
 
 
@@ -98,15 +110,15 @@ class Booking(Base):
     box_id: Mapped[int] = mapped_column(
         ForeignKey(Box.id, ondelete='RESTRICT')
     )
-    price: Mapped[Numeric] = mapped_column(Numeric(10, 2), nullable=True)
+    base_price: Mapped[Numeric] = mapped_column(Numeric(10, 2))
+    total_price: Mapped[Numeric] = mapped_column(Numeric(10, 2))
+    additions: Mapped[JSON] = mapped_column(type_=JSON)
 
     start_datetime: Mapped[datetime]
     end_datetime: Mapped[datetime]
 
-    is_accepted: Mapped[bool] = mapped_column(default=False)
-    is_completed: Mapped[bool] = mapped_column(default=False)
-
-    is_exception: Mapped[bool] = mapped_column(default=False)
+    state: Mapped[str]
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
 
     # Relationships
@@ -144,3 +156,29 @@ class CarWashPrice(Base):
         'CarWash', back_populates='prices'
     )
     body_type: Mapped['CarBodyType'] = relationship('CarBodyType')
+
+
+class CarWashAddition(Base):
+    __tablename__ = 'car_wash__addition'
+    __table_args__ = (
+        UniqueConstraint(
+            'car_wash_id',
+            'name',
+            name='uix_car_wash_addition___car_wash_id__name',
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str]
+    car_wash_id: Mapped[int] = mapped_column(
+        ForeignKey(CarWash.id, ondelete='CASCADE')
+    )
+
+    price: Mapped[Numeric] = mapped_column(Numeric(10, 2))
+
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+    # Relationships
+    car_wash: Mapped['CarWash'] = relationship(
+        'CarWash', back_populates='additions'
+    )

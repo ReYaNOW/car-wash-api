@@ -14,6 +14,7 @@ from car_wash.washes.locations.schemas import CarWashLocationRead
 
 class CarWashCreate(CustomBaseModel):
     name: str = Field(examples=['Spa Detailing'])
+    phone_number: str | None = None
     location_id: int = Field(examples=[1])
 
     active: SkipJsonSchema[bool] = Field(default=False)
@@ -23,6 +24,7 @@ class CarWashCreate(CustomBaseModel):
 class CarWashRead(BaseModel):
     id: int
     name: str
+    phone_number: str | None
     active: bool
 
     image_path: str | None = None
@@ -58,6 +60,7 @@ class CarWashList(GenericListRequest):
 
 class CarWashUpdate(CustomBaseModel):
     name: str = Field(default=None, examples=['Spa Detailing'])
+    phone_number: str | None = None
     location_id: int = Field(default=None, examples=[1])
 
     image_path: SkipJsonSchema[str | None] = Field(default=None)

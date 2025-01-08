@@ -41,8 +41,7 @@ line-length = 79
 select = ["ALL"]
 ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913',
           'PYI051', 'ANN401', 'RET503', 'TCH001', 'D203', 'D213',
-          "TD", "FIX001",
-   "ERA001"]
+          "TD", "FIX001", "ERA001", 'RUF001']
 # D Missing docstrings
 # FA102 Missing `from __future__ import annotations`, but uses PEP 585 collection
 # RET504 Unnecessary assignment to ... before `return` statement
@@ -61,6 +60,8 @@ ignore = ['D1', 'FA102', 'RET504', 'COM812', 'ISC001', 'ANN204', 'PLR0913',
 
 # warning: `multi-line-summary-first-line` (D212) and `multi-line-summary-second-line`
 # (D213) are incompatible. Ignoring `multi-line-summary-second-line`.
+
+# RUF001 String contains ambiguous `е` (CYRILLIC SMALL LETTER IE). Did you mean `e` (LATIN SMALL LETTER E)?
 
 [tool.ruff.lint.per-file-ignores]
 "router.py" = ["ANN201"]

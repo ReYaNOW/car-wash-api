@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Literal, Self
+from enum import StrEnum, auto
+from typing import Any, Literal, Self
 
 from pydantic import (
     BaseModel,
@@ -13,24 +14,44 @@ from pydantic.json_schema import SkipJsonSchema
 
 from car_wash.cars.schemas import UserCarRead
 from car_wash.utils.schemas import GenericListRequest, GenericListResponse
+from car_wash.washes.additions.schemas import CarWashAdditionRead
 from car_wash.washes.boxes.schemas import BoxRead
 from car_wash.washes.exceptions import (
     NotTwoHoursError,
     StartDatetimeGreaterError,
 )
 from car_wash.washes.locations.schemas import CarWashLocationRead
+from car_wash.washes.models import Booking
+
+
+class StateEnum(StrEnum):
+    @staticmethod
+    def _generate_next_value_(name: str, _: Any, __: Any, ___: Any) -> str:
+        return name  # Возвращаем имя атрибута в верхнем регистре
+
+    CREATED = auto()
+    ACCEPTED = auto()
+    STARTED = auto()
+    COMPLETED = auto()
+    EXCEPTION = auto()
 
 
 class BookingCreate(BaseModel):
     box_id: int = Field(examples=[1])
-    user_car_id: int
+    user_car_id: int = Field(examples=[1])
 
-    is_exception: bool = Field(default=False)
+    state: StateEnum = Field(default=StateEnum.CREATED)
+    notes: str | None = Field(examples=['Не открывать багажник!!!'])
+    addition_ids: list[int] | None = Field(
+        default=None, exclude=True, examples=[[]]
+    )
 
     start_datetime: datetime
     end_datetime: datetime
 
-    price: SkipJsonSchema[Decimal | None] = Field(default=None)
+    base_price: SkipJsonSchema[Decimal | None] = Field(default=None)
+    total_price: SkipJsonSchema[Decimal | None] = Field(default=None)
+    additions: SkipJsonSchema[Decimal | None] = Field(default=None)
 
     @model_validator(mode='after')
     def check_start_end_datetime(self) -> Self:
@@ -52,12 +73,12 @@ class BookingRead(BaseModel):
     box_id: int
     box: BoxRead = Field(exclude=True)
 
-    price: Decimal | None
+    base_price: Decimal | None
+    total_price: Decimal | None
+    additions: list[CarWashAdditionRead]
 
-    is_accepted: bool
-    is_completed: bool
-
-    is_exception: bool
+    state: StateEnum
+    notes: str | None
 
     start_datetime: datetime
     end_datetime: datetime
@@ -70,6 +91,20 @@ class BookingRead(BaseModel):
     def location(self) -> CarWashLocationRead:
         return self.box.car_wash.location
 
+    @model_validator(mode='before')
+    def parse_additions(self, values: Any) -> Any:
+        if not isinstance(values, Booking):
+            return values
+        additions = values.additions
+
+        if isinstance(additions, list) and additions:
+            additions = [
+                CarWashAdditionRead.model_validate_json(addition)
+                for addition in additions
+            ]
+            values.additions = additions
+        return values
+
 
 class BookingList(GenericListRequest):
     order_by: Literal['id', 'created_at', 'user_id', 'box_id'] = 'id'
@@ -79,14 +114,13 @@ class BookingList(GenericListRequest):
 
 
 class BookingUpdate(BookingCreate):
-    box_id: int = Field(default=None, examples=[1])
+    box_id: int | None = Field(default=None, examples=[1])
 
-    start_datetime: datetime = Field(default=None)
-    end_datetime: datetime = Field(default=None)
+    start_datetime: datetime | None = Field(default=None)
+    end_datetime: datetime | None = Field(default=None)
 
-    is_accepted: bool = Field(default=None)
-    is_completed: bool = Field(default=None)
-    is_exception: bool = Field(default=None)
+    state: StateEnum | None = Field(default=None)
+    notes: str | None = None
 
 
 class CreateResponse(BaseModel):

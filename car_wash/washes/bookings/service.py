@@ -2,6 +2,7 @@ from car_wash.cars.body_types.repository import CarBodyTypeRepository
 from car_wash.cars.configurations.repository import CarConfigurationRepository
 from car_wash.cars.repository import UserCarRepository
 from car_wash.utils.service import GenericCRUDService
+from car_wash.washes.additions.service import CarWashAdditionService
 from car_wash.washes.bookings.repository import BookingRepository
 from car_wash.washes.bookings.schemas import BookingCreate
 from car_wash.washes.boxes.repository import BoxRepository
@@ -17,6 +18,7 @@ class BookingService(GenericCRUDService[Booking]):
     def __init__(self):
         super().__init__()
         self.car_wash_service = CarWashService()
+        self.addition_service = CarWashAdditionService()
         self.box_repo = BoxRepository()
         self.price_repo = CarWashPriceRepository()
         self.user_car_repo = UserCarRepository()
@@ -57,7 +59,22 @@ class BookingService(GenericCRUDService[Booking]):
                 ]
             )
 
-        new_booking.price = price_entity.price
+        new_booking.base_price = price_entity.price
+        new_booking.total_price = price_entity.price
+
+        if new_booking.addition_ids:
+            additions = await self.addition_service.read_by_ids(
+                new_booking.addition_ids
+            )
+
+            for addition in additions:
+                new_booking.total_price += addition.price
+
+            new_booking.additions = [
+                addition.model_dump_json() for addition in additions
+            ]
+        else:
+            new_booking.additions = []
 
         entity_dict = new_booking.model_dump()
         entity_id = await self.crud_repo.add_one(entity_dict)

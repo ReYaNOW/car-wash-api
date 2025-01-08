@@ -2,12 +2,13 @@ from datetime import date as dt
 from datetime import datetime, time
 from typing import Protocol
 
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, or_
 from sqlalchemy.future import select
 
 from car_wash.database import async_session_maker
 from car_wash.utils.exception_handling import orm_errors_handler
 from car_wash.utils.repository import SQLAlchemyRepository
+from car_wash.washes.bookings.schemas import StateEnum
 from car_wash.washes.models import Booking, Box, CarWash, Schedule
 
 
@@ -68,7 +69,7 @@ class CarWashRepository(SQLAlchemyRepository[CarWash]):
                     Schedule.is_available.is_(True),
                     or_(
                         Booking.id.is_(None),
-                        func.coalesce(Booking.is_exception, False).is_(False),
+                        Booking.state != StateEnum.EXCEPTION.value,
                     ),
                 )
                 .order_by(Box.id, Booking.start_datetime)
