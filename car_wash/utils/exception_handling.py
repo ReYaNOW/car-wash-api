@@ -70,7 +70,9 @@ def orm_errors_handler(
         try:
             result = await func(self, *args, **kwargs)
             if result is None and self.raise_404_when_find_one_not_found:
-                raise HTTPException(status_code=404)
+                raise HTTPException(
+                    status_code=404, detail=f'{self.model}, {args=}, {kwargs=}'
+                )
         except IntegrityError as e:
             handle_integrity_error(e, self.model.__tablename__)
         else:
