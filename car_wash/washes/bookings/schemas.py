@@ -92,18 +92,19 @@ class BookingRead(BaseModel):
         return self.box.car_wash.location
 
     @model_validator(mode='before')
-    def parse_additions(self, values: Any) -> Any:
-        if not isinstance(values, Booking):
-            return values
-        additions = values.additions
+    @classmethod
+    def parse_additions(cls, data: Any) -> Any:
+        if not isinstance(data, Booking):
+            return data
+        additions = data.additions
 
         if isinstance(additions, list) and additions:
             additions = [
                 CarWashAdditionRead.model_validate_json(addition)
                 for addition in additions
             ]
-            values.additions = additions
-        return values
+            data.additions = additions
+        return data
 
 
 class BookingList(GenericListRequest):
