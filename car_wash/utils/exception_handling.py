@@ -75,7 +75,7 @@ def orm_errors_handler(
 
                 # Use inspect to get the argument names of the function
                 signature = inspect.signature(func)
-                param_names = list(signature.parameters.keys())
+                param_names = list(signature.parameters.keys())[1:]
 
                 # Create a dictionary of argument names and values
                 args_dict = {param_names[i]: args[i] for i in range(len(args))}
