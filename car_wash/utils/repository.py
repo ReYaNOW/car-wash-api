@@ -169,7 +169,9 @@ class SQLAlchemyRepository(AbstractRepository[T]):
             )
             res = await session.execute(stmt)
             await session.commit()
-            return res.scalar()
+
+            model = res.scalar()
+            return await self.find_one(model.id)
 
     @orm_errors_handler
     async def change_one_by_custom_field(
@@ -185,7 +187,8 @@ class SQLAlchemyRepository(AbstractRepository[T]):
             )
             res = await session.execute(stmt)
             await session.commit()
-            return res.scalar()
+            model = res.scalar()
+            return await self.find_one(model.id)
 
     @orm_errors_handler
     async def delete_one(self, id: int) -> T:
