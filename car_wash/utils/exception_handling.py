@@ -1,4 +1,5 @@
 import functools
+import inspect
 from typing import TYPE_CHECKING, Any, Callable
 
 from fastapi import HTTPException
@@ -71,12 +72,23 @@ def orm_errors_handler(
             result = await func(self, *args, **kwargs)
             if result is None and self.raise_404_when_find_one_not_found:
                 func_name = func.__name__
-                args_str = ', '.join(f'{arg}' for arg in args)
+
+                # Use inspect to get the argument names of the function
+                signature = inspect.signature(func)
+                param_names = list(signature.parameters.keys())
+
+                # Create a dictionary of argument names and values
+                args_dict = {param_names[i]: args[i] for i in range(len(args))}
+                args_str = ', '.join(
+                    f'{key}={value}' for key, value in args_dict.items()
+                )
+
                 kwargs_str = ', '.join(
                     f'{key}={value}' for key, value in kwargs.items()
                 )
+
                 details = (
-                    f'Model: {self.model}, Function: {func_name}, '
+                    f'Function: {func_name}, '
                     f'Args: ({args_str}), Kwargs: ({kwargs_str})'
                 )
                 raise HTTPException(
