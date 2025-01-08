@@ -115,6 +115,7 @@ class BookingList(GenericListRequest):
 
 
 class BookingUpdate(BookingCreate):
+    user_car_id: int | None = Field(default=None, examples=[1])
     box_id: int | None = Field(default=None, examples=[1])
 
     start_datetime: datetime | None = Field(default=None)
