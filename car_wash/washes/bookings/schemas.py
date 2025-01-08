@@ -41,7 +41,9 @@ class BookingCreate(BaseModel):
     user_car_id: int = Field(examples=[1])
 
     state: StateEnum = Field(default=StateEnum.CREATED)
-    notes: str | None = Field(examples=['Не открывать багажник!!!'])
+    notes: str | None = Field(
+        default=None, examples=['Не открывать багажник!!!']
+    )
     addition_ids: list[int] | None = Field(
         default=None, exclude=True, examples=[[]]
     )
